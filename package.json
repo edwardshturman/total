@@ -1,0 +1,32 @@
+{
+  "name": "total",
+  "author": "Edward Shturman",
+  "version": "0.1.0",
+  "license": "UNLICENSED",
+  "description": "A minimalist, web-based expense tracker",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/edwardshturman/total.git"
+  },
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "next": "15.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.1.0",
+    "@eslint/eslintrc": "^3"
+  }
+}
