@@ -1,4 +1,4 @@
-import { PrismaClient } from "../../generated/prisma"
+import { PrismaClient } from "@/generated/prisma"
 
 // ======================================================================
 // Prevent Prisma from being instantiated multiple times
