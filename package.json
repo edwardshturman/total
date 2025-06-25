@@ -16,11 +16,10 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@prisma/client": "^6.10.1",
-    "better-auth": "^1.2.10",
+    "@prisma/client": "6.10.1",
+    "better-auth": "1.2.10",
     "next": "15.3.3",
     "plaid": "36.0.0",
-    "prisma": "^6.10.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-plaid-link": "4.0.1"
@@ -32,6 +31,7 @@
     "@types/react-dom": "19.1.0",
     "eslint": "9.28.0",
     "eslint-config-next": "15.3.3",
+    "prisma": "6.10.1",
     "typescript": "5.8.3"
   }
 }
