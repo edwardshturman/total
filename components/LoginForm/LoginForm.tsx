@@ -1,15 +1,13 @@
 "use client"
 
-import Image from "next/image"
-
 import { authClient } from "@/lib/auth-client"
 
 async function handleLoginWithGoogle() {
-  await authClient.signIn.social({
+  const data = await authClient.signIn.social({
     provider: "google",
     callbackURL: "/plaid"
   })
-  console.log("google")
+  console.log(data)
 }
 
 export function LoginForm() {
@@ -20,10 +18,6 @@ export function LoginForm() {
         className="google-button"
         onClick={handleLoginWithGoogle}
       >
-        <Image
-          src="https://developers.google.com/identity/images/g-logo.png"
-          alt="Google logo"
-        />
         Login with Google
       </button>
     </div>
