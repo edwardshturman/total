@@ -2,7 +2,8 @@
 
 import {
   exchangePublicTokenForAccessToken,
-  getAccountInfo
+  getAccountInfo,
+  getTransactions
 } from "@/functions/plaid"
 
 export async function exchangePublicTokenForAccessTokenServerAction(
@@ -10,6 +11,8 @@ export async function exchangePublicTokenForAccessTokenServerAction(
 ) {
   const accessToken = await exchangePublicTokenForAccessToken(publicToken)
   const accountData = await getAccountInfo(accessToken)
+  const transactionsData = await getTransactions(accessToken)
   console.log(accountData)
+  console.log(transactionsData)
   return accountData
 }

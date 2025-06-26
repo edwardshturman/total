@@ -1,6 +1,8 @@
 import Image from "next/image"
 import styles from "./page.module.css"
 
+import { LoginForm } from "@/components/LoginForm"
+
 export default function Home() {
   return (
     <div className={styles.page}>
@@ -90,6 +92,7 @@ export default function Home() {
           Go to nextjs.org →
         </a>
       </footer>
+      <LoginForm></LoginForm>
     </div>
   )
 }
