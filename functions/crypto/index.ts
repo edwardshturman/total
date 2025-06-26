@@ -8,6 +8,10 @@ export class GCM {
     https://crypto.stackexchange.com/questions/41601/aes-gcm-recommended-iv-size-why-12-bytes
    */
 
+  /**
+    https://medium.com/@bh03051999/aes-gcm-encryption-and-decryption-for-python-java-and-typescript-562dcaa96c22
+   */
+
   private key: Buffer
   private static readonly ALGORITHM = "aes-256-gcm"
   private static readonly IV_LEN = 12
