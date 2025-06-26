@@ -10,15 +10,19 @@ async function handleLoginWithGoogle() {
   console.log(data)
 }
 
+async function signOut() {
+  await authClient.signOut()
+}
+
 export function LoginForm() {
   return (
-    <div className="login-container">
+    <div>
       <h2>Login</h2>
-      <button
-        className="google-button"
-        onClick={handleLoginWithGoogle}
-      >
+      <button onClick={handleLoginWithGoogle}>
         Login with Google
+      </button>
+      <button onClick={signOut}>
+        Sign out
       </button>
     </div>
   )
