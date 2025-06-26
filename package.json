@@ -15,7 +15,8 @@
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
-    "migrate": "dotenv -e .env.local prisma migrate dev"
+    "migrate": "dotenv -e .env.local prisma migrate dev",
+    "refresh": "git pull && vc env pull"
   },
   "dependencies": {
     "@prisma/client": "6.10.1",
