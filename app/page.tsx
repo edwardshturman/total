@@ -1,24 +1,26 @@
+// Functions
 import { auth } from "@/lib/auth"
 import { headers } from "next/headers"
+import { redirect } from "next/navigation"
 
-import { PlaidLink } from "@/components/PlaidLink"
+// Constants
+import { APP_NAME } from "@/lib/constants"
 
-import { createLinkToken } from "@/functions/plaid"
+// Components
+import { SignIn } from "@/components/SignIn"
 
-export default async function Plaid() {
+export default async function Home() {
   const session = await auth.api.getSession({
     headers: await headers()
   })
-  const linkTokenResponse = await createLinkToken("edward")
-  console.log("linkToken response data:", linkTokenResponse)
+  if (session) {
+    redirect("/plaid")
+  }
 
   return (
     <>
-      <h1>Plaid</h1>
-      <p>User:</p>
-      <p>{session && session.user.email}</p>
-      <p>Link token: {linkTokenResponse.link_token}</p>
-      <PlaidLink linkToken={linkTokenResponse.link_token} />
+      <h1>{APP_NAME}</h1>
+      <SignIn />
     </>
   )
 }
