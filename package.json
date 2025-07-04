@@ -13,22 +13,29 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "prisma generate",
+    "migrate": "dotenv -e .env.local prisma migrate dev",
+    "refresh": "git pull && vc env pull"
   },
   "dependencies": {
+    "@prisma/client": "6.10.1",
     "next": "15.3.3",
+    "next-auth": "5.0.0-beta.25",
     "plaid": "36.0.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-plaid-link": "4.0.1"
   },
   "devDependencies": {
-    "typescript": "5.8.3",
+    "@eslint/eslintrc": "3.3.1",
     "@types/node": "24.0.1",
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.0",
+    "dotenv-cli": "8.0.0",
     "eslint": "9.28.0",
     "eslint-config-next": "15.3.3",
-    "@eslint/eslintrc": "3.3.1"
+    "prisma": "6.10.1",
+    "typescript": "5.8.3"
   }
 }

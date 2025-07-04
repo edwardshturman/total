@@ -10,10 +10,13 @@ build/
 .DS_Store
 
 # Env files
-.env*
+.env*.local
 
 # Vercel
 .vercel
 
 # TypeScript
 next-env.d.ts
+
+# Prisma
+/generated/prisma

@@ -5,11 +5,12 @@ import {
   PlaidEnvironments,
   Products
 } from "plaid"
+import { APP_NAME } from "@/lib/constants"
 
 const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID
 const PLAID_SECRET = process.env.PLAID_SECRET
 const PLAID_ENV = process.env.PLAID_ENV || "sandbox"
-const PLAID_PRODUCTS = [Products.Auth, Products.Transactions, Products.Identity]
+const PLAID_PRODUCTS = [Products.Transactions]
 const PLAID_COUNTRY_CODES = [CountryCode.Us]
 
 const configuration = new Configuration({
@@ -30,7 +31,7 @@ export async function createLinkToken(userId: string) {
     user: {
       client_user_id: userId
     },
-    client_name: "Total",
+    client_name: APP_NAME,
     products: PLAID_PRODUCTS,
     country_codes: PLAID_COUNTRY_CODES,
     language: "en"
@@ -54,4 +55,10 @@ export async function getAccountInfo(accessToken: string) {
   const accountsResponse = await client.accountsGet({ access_token: accessToken })
   const accountData = accountsResponse.data.accounts[0]
   return accountData
+}
+
+export async function getTransactions(accessToken: string) {
+  const transactionsResponse = await client.transactionsSync({ access_token: accessToken })
+  const transactionsData = transactionsResponse.data
+  return transactionsData
 }
