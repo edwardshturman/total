@@ -1,8 +1,6 @@
-import prisma from "@/functions/db"
-import { betterAuth } from "better-auth"
-import { unauthorized } from "next/navigation"
-import { prismaAdapter } from "better-auth/adapters/prisma"
-import { createAuthMiddleware, APIError } from "better-auth/api"
+import NextAuth from "next-auth"
+import GoogleProvider from "next-auth/providers/google"
+import type { NextAuthConfig, Session } from "next-auth"
 
 if (!process.env.GOOGLE_CLIENT_ID) {
   throw new Error("Missing env var GOOGLE_CLIENT_ID")
@@ -10,29 +8,57 @@ if (!process.env.GOOGLE_CLIENT_ID) {
 if (!process.env.GOOGLE_CLIENT_SECRET) {
   throw new Error("Missing env var GOOGLE_CLIENT_SECRET")
 }
+if (!process.env.NEXTAUTH_SECRET) {
+  throw new Error("Missing env var NEXTAUTH_SECRET")
+}
 
-const whitelistEnvVar = process.env.WHITELIST!
-const whitelist = whitelistEnvVar.split(",")
-
-export const auth = betterAuth({
-  database: prismaAdapter(prisma, {
-    provider: "postgresql"
-  }),
-  socialProviders: {
-    google: {
-      prompt: "select_account",
+export const authOptions: NextAuthConfig = {
+  providers: [
+    GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET
-    }
-  },
-  hooks: {
-    before: createAuthMiddleware(async (ctx) => {
-      if (ctx.path !== "/sign-in/social") {
-        return
-      }
-      if (ctx.body?.email && !whitelist.includes(ctx.body?.email)) {
-        unauthorized()
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      profile(profile) {
+        return {
+          id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture
+        }
       }
     })
+  ],
+  callbacks: {
+    async jwt({ token, profile }) {
+      if (profile) {
+        token.id = profile.sub
+        token.picture = profile.picture
+      }
+      return token
+    },
+    async session({ session, token }) {
+      session.user.id = token.id as string
+      session.user.image = token.picture
+      return session
+    }
   }
-})
+}
+
+export const {
+  handlers: { GET, POST },
+  auth
+} = NextAuth(authOptions)
+
+export function isAuthorized(session: Session | null) {
+  const userId = session?.user?.id
+  const userEmail = session?.user?.email
+  if (!userId || !userEmail) return false
+
+  const whitelistEnvVar = process.env.WHITELIST
+  if (!whitelistEnvVar) {
+    throw new Error("Missing env var WHITELIST")
+  }
+  const whitelist = whitelistEnvVar.split(",")
+  if (!whitelist.includes(userEmail)) return false
+
+  return true
+}

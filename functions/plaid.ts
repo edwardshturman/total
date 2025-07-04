@@ -5,6 +5,7 @@ import {
   PlaidEnvironments,
   Products
 } from "plaid"
+import { APP_NAME } from "@/lib/constants"
 
 const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID
 const PLAID_SECRET = process.env.PLAID_SECRET
@@ -30,7 +31,7 @@ export async function createLinkToken(userId: string) {
     user: {
       client_user_id: userId
     },
-    client_name: "Total",
+    client_name: APP_NAME,
     products: PLAID_PRODUCTS,
     country_codes: PLAID_COUNTRY_CODES,
     language: "en"

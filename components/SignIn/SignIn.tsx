@@ -1,13 +1,9 @@
 "use client"
 
-// Auth client
-import { authClient } from "@/lib/auth-client"
+import { signIn } from "next-auth/react"
 
 async function handleLoginWithGoogle() {
-  return await authClient.signIn.social({
-    provider: "google",
-    callbackURL: "/plaid"
-  })
+  return await signIn("google", { callbackUrl: "/plaid" })
 }
 
 export function SignIn() {

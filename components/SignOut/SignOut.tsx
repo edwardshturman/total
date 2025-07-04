@@ -1,19 +1,10 @@
 "use client"
 
-// Auth client
-import { authClient } from "@/lib/auth-client"
-
-// Functions
-import { redirect } from "next/navigation"
-
-async function signOut() {
-  await authClient.signOut()
-  redirect("/")
-}
+import { signOut } from "next-auth/react"
 
 export function SignOut() {
   return (
-    <button onClick={signOut}>
+    <button onClick={async () => await signOut()}>
       Sign out
     </button>
   )
