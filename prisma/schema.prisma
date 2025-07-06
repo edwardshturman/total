@@ -18,49 +18,49 @@ datasource db {
 // plaid.com/plaid-exchange/docs/authentication
 
 model User {
-  id        String   @id
+  id        String   @id @default(uuid())
   name      String
   email     String   @unique
   image     String?
-  createdAt DateTime
-  updatedAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
   items     Item[]   @relation("UserItems")
 }
 
 model Item {
-  id              String    @id
+  id              String    @id @default(uuid())
   userId          String
   itemId          String
   accessToken     String
   institutionName String?
-  createdAt       DateTime
-  updatedAt       DateTime
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now())
   accounts        Account[] @relation("ItemAccounts")
   user            User      @relation("UserItems", fields: [userId], references: [id])
 }
 
 model Account {
-  id           String        @id
+  id           String        @id @default(uuid())
   itemId       String
   name         String?
   officialName String
   mask         String?
-  createdAt    DateTime
-  updatedAt    DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now())
   item         Item          @relation("ItemAccounts", fields: [itemId], references: [id])
   transactions Transaction[] @relation("AccountTransactions")
 }
 
 model Transaction {
-  id            String   @id
+  id            String   @id @default(uuid())
   transactionId String   @unique
   accountId     String
   currencyCode  String
   amount        Decimal
-  date          DateTime
+  date          DateTime @default(now())
   name          String
-  createdAt     DateTime
-  updatedAt     DateTime
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now())
   pending       Boolean
   account       Account  @relation("AccountTransactions", fields: [accountId], references: [id])
 }
