@@ -6,6 +6,9 @@ import { redirect, unauthorized } from "next/navigation"
 // Components
 import { SignOut } from "@/components/SignOut"
 import { PlaidLink } from "@/components/PlaidLink"
+import { getUserByEmail } from "@/functions/db/queries"
+import { CreateUserInput } from "@/functions/db/types"
+import { createUser } from "@/functions/db/mutations"
 
 export default async function Plaid() {
   const session = await auth()
@@ -18,9 +21,26 @@ export default async function Plaid() {
   const linkTokenResponse = await createLinkToken(session!.user!.id!)
   console.log("linkToken response data:", linkTokenResponse)
 
+  // If the user doesn't have an email in the session, return an error
+  if (!session?.user?.email) {
+    return <p>Error: User email not found in session.</p>
+  }
+
+
+  // Get the user by the email if they exist, otherwise create a new user
+  const user = await getUserByEmail(session.user.email)
+  if (!user) {
+    const createUserInput: CreateUserInput = {
+      Name: session.user.name || "Unknown User",
+      Email: session.user.email,
+      Image: session.user.image,
+    }
+    await createUser(createUserInput)
+  }
+
   return (
     <>
-      <p>User: {session!.user!.email!}</p>
+      <p>User: {session.user.email}</p>
       <p>Link token: {linkTokenResponse.link_token}</p>
       <PlaidLink linkToken={linkTokenResponse.link_token} />
       <SignOut />
