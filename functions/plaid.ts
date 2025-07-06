@@ -1,9 +1,13 @@
 import {
   Configuration,
   CountryCode,
+  ItemGetRequest,
   PlaidApi,
   PlaidEnvironments,
-  Products
+  Products,
+  RemovedTransaction,
+  Transaction,
+  TransactionsSyncRequest
 } from "plaid"
 import { APP_NAME } from "@/lib/constants"
 
@@ -53,12 +57,48 @@ export async function exchangePublicTokenForAccessToken(publicToken: string) {
 
 export async function getAccountInfo(accessToken: string) {
   const accountsResponse = await client.accountsGet({ access_token: accessToken })
-  const accountData = accountsResponse.data.accounts[0]
-  return accountData
+  return accountsResponse.data;
 }
 
-export async function getTransactions(accessToken: string) {
-  const transactionsResponse = await client.transactionsSync({ access_token: accessToken })
-  const transactionsData = transactionsResponse.data
-  return transactionsData
+export async function getItem(request: ItemGetRequest) {
+  const response = await client.itemGet(request)
+  const item = response.data.item;
+  return item;
+}
+
+
+// TODO: Create a notion of a cursor in the database to keep track of the last synced transaction
+export async function syncTransactions(accessToken: string) {
+  let cursor = undefined; // Would actually get this from the database like:
+  // let cursor = database.getCursorForAccessToken(accessToken);
+
+
+  // New transaction updates since "cursor"
+  let added: Array<Transaction> = [];
+  let modified: Array<Transaction> = [];
+  // Removed transaction ids
+  let removed: Array<RemovedTransaction> = [];
+  let hasMore = true;
+
+  // Iterate through each page of new transaction updates for item
+  while (hasMore) {
+    const request: TransactionsSyncRequest = {
+      access_token: accessToken,
+      cursor: cursor,
+    };
+    const response = await client.transactionsSync(request);
+    const data = response.data;
+
+    // Add this page of results
+    added = added.concat(data.added);
+    modified = modified.concat(data.modified);
+    removed = removed.concat(data.removed);
+
+    hasMore = data.has_more;
+
+    // Update cursor to the next cursor
+    cursor = data.next_cursor;
+  }
+
+  return added.concat(modified);
 }

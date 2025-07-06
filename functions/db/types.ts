@@ -1,4 +1,4 @@
-import { Account, User } from "@/generated/prisma";
+import { Account, Transaction, User } from "@/generated/prisma";
 
 export type CreateUserInput = {
   Name: string;
@@ -6,15 +6,24 @@ export type CreateUserInput = {
   Image: string | null | undefined;
 }
 
-export type UserWithAccounts = {
+export type UserWithAccountsAndTransactions = {
   User: User
   Accounts: Account[]
+  Transactions: Transaction[]
 }
 
 export type CreateAccountInput = {
   ID: string;
-  Name: string;
+  ItemID: string;
+  Name?: string;
   OfficialName: string;
-  Mask: string;
+  Mask?: string;
   UserID: string;
+}
+
+export type CreateItemInput = {
+  ID: string;
+  UserID: string;
+  AccessToken: string;
+  InstitutionName?: string;
 }

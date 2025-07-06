@@ -1,8 +1,8 @@
-import { User, Account } from "@/generated/prisma";
+import { User, Account, Item } from "@/generated/prisma";
 import prisma from "@/functions/db/index";
-import { CreateAccountInput, CreateUserInput, UserWithAccounts } from "./types";
+import { CreateAccountInput, CreateItemInput, CreateUserInput, UserWithAccountsAndTransactions } from "./types";
 
-export async function createUser(userInput: CreateUserInput): Promise<UserWithAccounts> {
+export async function createUser(userInput: CreateUserInput): Promise<UserWithAccountsAndTransactions> {
   const resp = await prisma.user.create({
     data: {
       name: userInput.Name,
@@ -11,12 +11,25 @@ export async function createUser(userInput: CreateUserInput): Promise<UserWithAc
     }
   });
 
-  const user: UserWithAccounts = {
+  const user: UserWithAccountsAndTransactions = {
     User: resp as User,
     Accounts: [],
+    Transactions: [],
   }
 
   return user
+}
+
+export async function createItem(itemInput: CreateItemInput): Promise<Item> {
+  const resp = await prisma.item.create({
+    data: {
+      id: itemInput.ID,
+      userId: itemInput.UserID,
+      accessToken: itemInput.AccessToken,
+      institutionName: itemInput.InstitutionName || "",
+    }
+  })
+  return resp;
 }
 
 export async function createAccount(accountInput: CreateAccountInput): Promise<Account> {
@@ -27,8 +40,9 @@ export async function createAccount(accountInput: CreateAccountInput): Promise<A
       officialName: accountInput.OfficialName,
       mask: accountInput.Mask,
       userId: accountInput.UserID,
+      itemId: accountInput.ItemID,
     }
   })
 
-  return resp as Account;
+  return resp;
 }
