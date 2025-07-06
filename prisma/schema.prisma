@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
@@ -14,17 +8,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// plaid.com/docs/quickstart/glossary
-// plaid.com/plaid-exchange/docs/authentication
-
 model User {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   name      String
-  email     String   @unique
+  email     String    @unique
   image     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-  items     Item[]   @relation("UserItems")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+  accounts  Account[]
+  items     Item[]    @relation("UserItems")
 }
 
 model Item {
@@ -33,8 +25,8 @@ model Item {
   itemId          String
   accessToken     String
   institutionName String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @default(now())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @default(now())
   accounts        Account[] @relation("ItemAccounts")
   user            User      @relation("UserItems", fields: [userId], references: [id])
 }
@@ -45,9 +37,11 @@ model Account {
   name         String?
   officialName String
   mask         String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @default(now())
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @default(now())
+  userId       String
   item         Item          @relation("ItemAccounts", fields: [itemId], references: [id])
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[] @relation("AccountTransactions")
 }
 

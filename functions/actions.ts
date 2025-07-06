@@ -7,6 +7,7 @@ import {
 } from "@/functions/plaid"
 
 export async function exchangePublicTokenForAccessTokenServerAction(
+  userId: string,
   publicToken: string
 ) {
   const accessToken = await exchangePublicTokenForAccessToken(publicToken)

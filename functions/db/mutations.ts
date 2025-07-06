@@ -1,14 +1,20 @@
 import { User } from "@/generated/prisma";
 import prisma from "@/functions/db/index";
-import { CreateUserInput } from "./types";
+import { CreateUserInput, UserWithAccounts } from "./types";
 
-export async function createUser(userInput: CreateUserInput): Promise<User> {
-  const user = await prisma.user.create({
+export async function createUser(userInput: CreateUserInput): Promise<UserWithAccounts> {
+  const resp = await prisma.user.create({
     data: {
       name: userInput.Name,
       email: userInput.Email,
       image: userInput.Image,
     }
   });
-  return user as User;
+
+  const user: UserWithAccounts = {
+    User: resp as User,
+    Accounts: [],
+  }
+
+  return user
 }
