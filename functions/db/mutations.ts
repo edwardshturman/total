@@ -1,23 +1,20 @@
 import { User, Account, Item } from "@/generated/prisma";
 import prisma from "@/functions/db/index";
-import { CreateAccountInput, CreateCursorInput, CreateItemInput, CreateUserInput, UpdateCursorInput, UserWithAccountsAndTransactions } from "./types";
+import { CreateAccountInput, CreateCursorInput, CreateItemInput, CreateUserInput, UpdateCursorInput } from "./types";
 
-export async function createUser(userInput: CreateUserInput): Promise<UserWithAccountsAndTransactions> {
+export async function createUser(userInput: CreateUserInput) {
   const resp = await prisma.user.create({
     data: {
       name: userInput.Name,
       email: userInput.Email,
       image: userInput.Image,
+    },
+    include: {
+      items: true,
     }
   });
 
-  const user: UserWithAccountsAndTransactions = {
-    User: resp as User,
-    Accounts: [],
-    Transactions: [],
-  }
-
-  return user
+  return resp;
 }
 
 export async function createItem(itemInput: CreateItemInput): Promise<Item> {

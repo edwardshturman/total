@@ -30,7 +30,7 @@ export default async function Plaid() {
   }
 
   // Get the user by the email if they exist, otherwise create a new user
-  var userResponse = await getUserByEmail(session.user.email)
+  let userResponse = await getUserByEmail(session.user.email)
   if (!userResponse) {
     const createUserInput: CreateUserInput = {
       Name: session.user.name || "Unknown User",
@@ -64,8 +64,8 @@ export default async function Plaid() {
     <>
       <p>User: {session.user.email}</p>
       <p>Link token: {linkTokenResponse.link_token}</p>
-      {userResponse.Accounts.length != 0 ? (
-        <PlaidLink userId={userResponse.User.id} linkToken={linkTokenResponse.link_token} />
+      {userResponse.items.length === 0 ? (
+        <PlaidLink userId={userResponse.id} linkToken={linkTokenResponse.link_token} />
       ) : (
         <Transactions transactions={transactions}
         />

@@ -1,21 +1,16 @@
-import { Account, Transaction, User } from "@/generated/prisma";
 import prisma from "@/functions/db/index";
-import { UserWithAccountsAndTransactions } from "./types";
 
-export async function getUserByEmail(email: string): Promise<UserWithAccountsAndTransactions> {
+export async function getUserByEmail(email: string) {
   const resp = await prisma.user.findUnique({
     where: {
       email: email,
     },
+    include: {
+      items: true,
+    }
   })
 
-  // TODO: fix this to use items instead of accounts
-  const user: UserWithAccountsAndTransactions = {
-    User: resp as User,
-    Accounts: [] as Account[],
-    Transactions: [] as Transaction[],
-  }
-  return user
+  return resp;
 }
 
 export async function getCursor(accessToken: string) {

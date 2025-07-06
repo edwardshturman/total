@@ -9,14 +9,14 @@ export function Transactions({ transactions }: { transactions: Transaction[] }) 
   const [searchQuery, setSearchQuery] = useState('')
   const [showPendingOnly, setShowPendingOnly] = useState(false)
   const filteredAndSortedTransactions = useMemo(() => {
-    let filtered = transactions.filter(transaction: any => {
+    const filtered = transactions.filter(transaction => {
       const matchesSearch = transaction.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         transaction.transactionId.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesPending = showPendingOnly ? transaction.pending : true
       return matchesSearch && matchesPending
     })
 
-    return filtered.sort((a, b: any) => {
+    return filtered.sort((a, b) => {
       const aValue = a[sortField]
       const bValue = b[sortField]
 
@@ -52,8 +52,8 @@ export function Transactions({ transactions }: { transactions: Transaction[] }) 
     }
   }
 
-  const formatCurrency = (amount: any, currencyCode: string) => {
-    const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount
+  const formatCurrency = (amount: string, currencyCode: string) => {
+    const numAmount = parseFloat(amount)
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currencyCode,
@@ -178,7 +178,7 @@ export function Transactions({ transactions }: { transactions: Transaction[] }) 
                     ...styles.amountCell,
                     color: parseFloat(transaction.amount.toString()) >= 0 ? '#059669' : '#dc2626'
                   }}>
-                    {formatCurrency(transaction.amount, transaction.currencyCode)}
+                    {formatCurrency(transaction.amount.toString(), transaction.currencyCode)}
                   </span>
                 </td>
                 <td style={styles.tableCell}>
