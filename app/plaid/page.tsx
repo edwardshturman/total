@@ -1,6 +1,6 @@
 // Functions
 import { auth, isAuthorized } from "@/lib/auth"
-import { createLinkToken, exchangePublicTokenForAccessToken, syncTransactions } from "@/functions/plaid"
+import { createLinkToken, syncTransactions } from "@/functions/plaid"
 import { redirect, unauthorized } from "next/navigation"
 
 // Components
@@ -10,7 +10,6 @@ import { getUserByEmail } from "@/functions/db/queries"
 import { CreateUserInput } from "@/functions/db/types"
 import { createUser } from "@/functions/db/mutations"
 import { Transaction } from "@/generated/prisma"
-import { Decimal } from "@prisma/client/runtime/library"
 import { Transactions } from "@/components/Transactions"
 
 export default async function Plaid() {
@@ -40,23 +39,26 @@ export default async function Plaid() {
     userResponse = await createUser(createUserInput)
   }
 
-  // Get the access token for the user
-  const accessToken = await exchangePublicTokenForAccessToken(linkTokenResponse.link_token)
+  console.log("userResponse: ", userResponse)
 
-  // Sync the transactions
-  const transactionSyncResponse = await syncTransactions(accessToken)
-  const transactions: Transaction[] = []
-  for (const transaction of transactionSyncResponse) {
-    transactions.push({
-      id: transaction.transaction_id,
-      transactionId: transaction.transaction_id,
-      accountId: transaction.account_id,
-      currencyCode: transaction.iso_currency_code,
-      amount: Decimal(transaction.amount),
-      date: new Date(transaction.date),
-      name: transaction.name,
-      pending: transaction.pending,
-    } as Transaction)
+  let transactions: Transaction[] = []
+
+  // If this user has items, then sync transactions for each item
+  if (userResponse.items.length > 0) {
+    // Iterate through each item
+    for (const item of userResponse.items) {
+
+      // Get the access token for the item
+      const accessToken = item.accessToken
+
+      // Iterate through each account for the item
+      for (const account of item.accounts) {
+        // Sync the transactions for the account
+        const transactionSyncResponse = await syncTransactions(accessToken, account.id)
+        console.log("transactionSyncResponse: ", transactionSyncResponse)
+        transactions = transactions.concat(transactionSyncResponse)
+      }
+    }
   }
 
   // TODO: After the user connects their accounts, add a new option for "add a new account"

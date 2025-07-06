@@ -3,12 +3,9 @@
 import {
   exchangePublicTokenForAccessToken,
   getAccountInfo,
-  getItem,
-  syncTransactions,
 } from "@/functions/plaid"
 import { createAccount, createItem } from "./db/mutations"
 import { CreateAccountInput, CreateItemInput } from "./db/types"
-import { ItemGetRequest } from "plaid"
 
 export async function exchangePublicTokenForAccessTokenServerAction(
   userId: string,
@@ -17,6 +14,10 @@ export async function exchangePublicTokenForAccessTokenServerAction(
 
   // Fetch the access token using the public token
   const accessToken = await exchangePublicTokenForAccessToken(publicToken)
+  if (!accessToken) {
+    console.error("Failed to exchange public token for access token")
+    return
+  }
 
   // Get all the account info
   const accountInfo = await getAccountInfo(accessToken)

@@ -6,7 +6,11 @@ export async function getUserByEmail(email: string) {
       email: email,
     },
     include: {
-      items: true,
+      items: {
+        include: {
+          accounts: true,
+        }
+      },
     }
   })
 
@@ -17,6 +21,15 @@ export async function getCursor(accessToken: string) {
   const resp = await prisma.cursor.findUnique({
     where: {
       accessToken: accessToken,
+    }
+  })
+  return resp;
+}
+
+export async function getTransactions(accountId: string) {
+  const resp = await prisma.transaction.findMany({
+    where: {
+      accountId: accountId,
     }
   })
   return resp;

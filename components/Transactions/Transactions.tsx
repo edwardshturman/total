@@ -11,7 +11,7 @@ export function Transactions({ transactions }: { transactions: Transaction[] }) 
   const filteredAndSortedTransactions = useMemo(() => {
     const filtered = transactions.filter(transaction => {
       const matchesSearch = transaction.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        transaction.transactionId.toLowerCase().includes(searchQuery.toLowerCase())
+        transaction.id.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesPending = showPendingOnly ? transaction.pending : true
       return matchesSearch && matchesPending
     })
@@ -153,11 +153,11 @@ export function Transactions({ transactions }: { transactions: Transaction[] }) 
               </th>
               <th
                 style={styles.tableHeader}
-                onClick={() => handleSort('transactionId')}
+                onClick={() => handleSort('id')}
               >
                 <div style={styles.headerCell}>
                   Transaction ID
-                  <SortIcon field="transactionId" />
+                  <SortIcon field="id" />
                 </div>
               </th>
             </tr>
@@ -192,7 +192,7 @@ export function Transactions({ transactions }: { transactions: Transaction[] }) 
                 </td>
                 <td style={styles.tableCell}>
                   <span style={styles.transactionId}>
-                    {transaction.transactionId}
+                    {transaction.id}
                   </span>
                 </td>
               </tr>

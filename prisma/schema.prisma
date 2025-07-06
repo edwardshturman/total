@@ -52,7 +52,6 @@ model Cursor {
 
 model Transaction {
   id            String   @id @default(uuid())
-  transactionId String   @unique
   accountId     String
   currencyCode  String
   amount        Decimal
