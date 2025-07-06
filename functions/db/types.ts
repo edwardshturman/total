@@ -27,3 +27,13 @@ export type CreateItemInput = {
   AccessToken: string;
   InstitutionName?: string;
 }
+
+export type CreateCursorInput = {
+  AccessToken: string;
+  Cursor: string;
+}
+
+export type UpdateCursorInput = {
+  ID: string;
+  Cursor: string;
+}

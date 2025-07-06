@@ -29,7 +29,6 @@ export default async function Plaid() {
     return <p>Error: User email not found in session.</p>
   }
 
-
   // Get the user by the email if they exist, otherwise create a new user
   var userResponse = await getUserByEmail(session.user.email)
   if (!userResponse) {

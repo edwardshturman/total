@@ -1,6 +1,6 @@
 import { User, Account, Item } from "@/generated/prisma";
 import prisma from "@/functions/db/index";
-import { CreateAccountInput, CreateItemInput, CreateUserInput, UserWithAccountsAndTransactions } from "./types";
+import { CreateAccountInput, CreateCursorInput, CreateItemInput, CreateUserInput, UpdateCursorInput, UserWithAccountsAndTransactions } from "./types";
 
 export async function createUser(userInput: CreateUserInput): Promise<UserWithAccountsAndTransactions> {
   const resp = await prisma.user.create({
@@ -44,5 +44,28 @@ export async function createAccount(accountInput: CreateAccountInput): Promise<A
     }
   })
 
+  return resp;
+}
+
+export async function createCursor(cursorInput: CreateCursorInput) {
+  const resp = await prisma.cursor.create({
+    data: {
+      accessToken: cursorInput.AccessToken,
+      cursor: cursorInput.Cursor,
+    }
+  })
+
+  return resp;
+}
+
+export async function updateCursor(cursorInput: UpdateCursorInput) {
+  const resp = await prisma.cursor.update({
+    where: {
+      id: cursorInput.ID,
+    },
+    data: {
+      cursor: cursorInput.Cursor,
+    }
+  })
   return resp;
 }

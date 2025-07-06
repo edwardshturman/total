@@ -46,7 +46,7 @@ model Account {
 
 model Cursor {
   id          String @id @default(uuid())
-  accessToken String
+  accessToken String @unique
   cursor      String
 }
 

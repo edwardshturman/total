@@ -10,6 +10,9 @@ import {
   TransactionsSyncRequest
 } from "plaid"
 import { APP_NAME } from "@/lib/constants"
+import { getCursor } from "./db/queries"
+import { CreateCursorInput, UpdateCursorInput } from "./db/types"
+import { createCursor, updateCursor } from "./db/mutations"
 
 const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID
 const PLAID_SECRET = process.env.PLAID_SECRET
@@ -69,9 +72,8 @@ export async function getItem(request: ItemGetRequest) {
 
 // TODO: Create a notion of a cursor in the database to keep track of the last synced transaction
 export async function syncTransactions(accessToken: string) {
-  let cursor = undefined; // Would actually get this from the database like:
-  // let cursor = database.getCursorForAccessToken(accessToken);
-
+  const cursorResponse = await getCursor(accessToken);
+  let cursor = cursorResponse?.cursor || undefined;
 
   // New transaction updates since "cursor"
   let added: Array<Transaction> = [];
@@ -98,6 +100,23 @@ export async function syncTransactions(accessToken: string) {
 
     // Update cursor to the next cursor
     cursor = data.next_cursor;
+  }
+
+  // If the cursor doesn't exist in the database yet, create it
+  if (!cursorResponse) {
+    const createCursorInput: CreateCursorInput = {
+      Cursor: cursor || "",
+      AccessToken: accessToken,
+    }
+    const newCursor = await createCursor(createCursorInput);
+    console.log(`Created new cursor: ${newCursor.cursor} for access token: ${newCursor.accessToken}`);
+  } else {
+    const updateCursorInput: UpdateCursorInput = {
+      ID: cursorResponse.id,
+      Cursor: cursor || "",
+    }
+    const updatedCursor = await updateCursor(updateCursorInput)
+    console.log(`Updated cursor: ${updatedCursor.cursor} for access token: ${updatedCursor.accessToken}`);
   }
 
   return added.concat(modified);
