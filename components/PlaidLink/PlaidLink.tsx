@@ -3,10 +3,11 @@
 import { type PlaidLinkOptions, usePlaidLink } from "react-plaid-link"
 import { exchangePublicTokenForAccessTokenServerAction } from "@/functions/actions"
 
-export function PlaidLink({ linkToken }: { linkToken: string }) {
+export function PlaidLink({ userId, linkToken }: { userId: string, linkToken: string }) {
   async function onSuccess(public_token: string) {
     console.log("public_token", public_token)
-    await exchangePublicTokenForAccessTokenServerAction(public_token)
+    await exchangePublicTokenForAccessTokenServerAction(userId, public_token)
+    window.location.reload() // Reload the page to reflect the changes
   }
 
   const config: PlaidLinkOptions = {
