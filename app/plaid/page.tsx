@@ -38,6 +38,7 @@ export default async function Plaid() {
     userResponse = await createUser(createUserInput)
   }
 
+  // TODO: After the user connects their accounts, add a new option for "add a new account"
   return (
     <>
       <p>User: {session.user.email}</p>

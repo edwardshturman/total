@@ -7,6 +7,7 @@ export function PlaidLink({ userId, linkToken }: { userId: string, linkToken: st
   async function onSuccess(public_token: string) {
     console.log("public_token", public_token)
     await exchangePublicTokenForAccessTokenServerAction(userId, public_token)
+    window.location.reload() // Reload the page to reflect the changes
   }
 
   const config: PlaidLinkOptions = {

@@ -27,20 +27,17 @@ model Item {
   institutionName String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @default(now())
-  accounts        Account[] @relation("ItemAccounts")
   user            User      @relation("UserItems", fields: [userId], references: [id])
 }
 
 model Account {
   id           String        @id @default(uuid())
-  itemId       String
   name         String?
   officialName String
   mask         String?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @default(now())
   userId       String
-  item         Item          @relation("ItemAccounts", fields: [itemId], references: [id])
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[] @relation("AccountTransactions")
 }

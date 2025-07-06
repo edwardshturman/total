@@ -10,3 +10,11 @@ export type UserWithAccounts = {
   User: User
   Accounts: Account[]
 }
+
+export type CreateAccountInput = {
+  ID: string;
+  Name: string;
+  OfficialName: string;
+  Mask: string;
+  UserID: string;
+}
