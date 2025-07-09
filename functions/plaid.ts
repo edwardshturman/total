@@ -59,7 +59,6 @@ export async function createLinkToken(userId: string) {
 }
 
 export async function exchangePublicTokenForAccessToken(publicToken: string) {
-  console.log(`Exchanging public_token=${publicToken} for access_token`)
   const response = await client.itemPublicTokenExchange({
     public_token: publicToken
   })
