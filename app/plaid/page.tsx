@@ -1,16 +1,16 @@
 // Functions
 import { auth, isAuthorized } from "@/lib/auth"
-import { createLinkToken, syncTransactions } from "@/functions/plaid"
 import { redirect, unauthorized } from "next/navigation"
+import { createUser, getUserByEmail } from "@/functions/db/users"
+import { createLinkToken, syncTransactions } from "@/functions/plaid"
 
 // Components
 import { SignOut } from "@/components/SignOut"
 import { PlaidLink } from "@/components/PlaidLink"
-import { getUserByEmail } from "@/functions/db/queries"
-import { CreateUserInput } from "@/functions/db/types"
-import { createUser } from "@/functions/db/mutations"
-import { Transaction } from "@/generated/prisma"
 import { Transactions } from "@/components/Transactions"
+
+// Types
+import type { Transaction } from "@/generated/prisma"
 
 export default async function Plaid() {
   const session = await auth()
@@ -31,12 +31,10 @@ export default async function Plaid() {
   // Get the user by the email if they exist, otherwise create a new user
   let userResponse = await getUserByEmail(session.user.email)
   if (!userResponse) {
-    const createUserInput: CreateUserInput = {
-      Name: session.user.name || "Unknown User",
-      Email: session.user.email,
-      Image: session.user.image,
-    }
-    userResponse = await createUser(createUserInput)
+    userResponse = await createUser(
+      session.user.name || "Unknown User",
+      session.user.email
+    )
   }
 
   console.log("userResponse: ", userResponse)

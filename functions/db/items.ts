@@ -1,0 +1,19 @@
+import prisma from "@/functions/db"
+
+export type CreateItemInput = {
+  id: string
+  userId: string
+  accessToken: string
+  InstitutionName: string
+}
+
+export async function createItem(itemInput: CreateItemInput) {
+  return await prisma.item.create({
+    data: {
+      id: itemInput.id,
+      userId: itemInput.userId,
+      accessToken: itemInput.accessToken,
+      institutionName: itemInput.InstitutionName || "",
+    }
+  })
+}
