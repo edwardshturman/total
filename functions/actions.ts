@@ -2,47 +2,33 @@
 
 import {
   exchangePublicTokenForAccessToken,
-  getAccount,
+  getAccounts,
 } from "@/functions/plaid"
-import { createItem, type CreateItemInput } from "@/functions/db/items"
-import { createAccount, type CreateAccountInput } from "@/functions/db/accounts"
+import { createItem } from "@/functions/db/items"
+import { createAccount } from "@/functions/db/accounts"
 
 export async function exchangePublicTokenForAccessTokenServerAction(
   userId: string,
   publicToken: string
 ) {
-
-  // Fetch the access token using the public token
   const accessToken = await exchangePublicTokenForAccessToken(publicToken)
-  if (!accessToken) {
-    console.error("Failed to exchange public token for access token")
-    return
-  }
 
-  // Get all the account info
-  const accountInfo = await getAccount(accessToken)
+  // Add the Item to the database
+  const { item, accounts } = await getAccounts(accessToken)
+  await createItem({
+    id: item.item_id,
+    userId,
+    accessToken,
+    institutionName: item.institution_name || ""
+  })
 
-  // Create a new Item in the database
-  const createItemInput: CreateItemInput = {
-    id: accountInfo.item.item_id,
-    userId: userId,
-    accessToken: accessToken,
-    institutionName: accountInfo.item.institution_name || ""
-  }
-  const newItem = await createItem(createItemInput)
-  console.log("Created new item: ", newItem)
-
-  // Now create accounts for the items
-  for (const account of accountInfo.accounts) {
-    const newAccountInput: CreateAccountInput = {
+  // Add each account associated with the Item to the database
+  for (const account of accounts) {
+    await createAccount({
       id: account.account_id,
-      itemId: newItem.id,
+      itemId: item.item_id,
       name: account.name,
-      mask: account.mask || "",
-      userId: userId
-    }
-
-    const resp = await createAccount(newAccountInput)
-    console.log("Created account:", resp)
+      mask: account.mask || undefined
+    })
   }
 }

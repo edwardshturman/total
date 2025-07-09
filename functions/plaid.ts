@@ -73,7 +73,7 @@ export async function getItem(accessToken: string) {
   return response.data.item
 }
 
-export async function getAccount(accessToken: string) {
+export async function getAccounts(accessToken: string) {
   const accountsResponse = await client.accountsGet({ access_token: accessToken })
   return accountsResponse.data
 }

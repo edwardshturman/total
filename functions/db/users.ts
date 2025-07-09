@@ -1,6 +1,6 @@
 import prisma from "@/functions/db"
 
-export type CreateUserInput = {
+type CreateUserInput = {
   name: string
   email: string
 }

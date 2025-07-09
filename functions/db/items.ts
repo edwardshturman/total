@@ -1,6 +1,6 @@
 import prisma from "@/functions/db"
 
-export type CreateItemInput = {
+type CreateItemInput = {
   id: string
   userId: string
   accessToken: string

@@ -1,11 +1,11 @@
 import prisma from "@/functions/db"
 
-export type CreateCursorInput = {
+type CreateCursorInput = {
   accessToken: string
   string: string
 }
 
-export type UpdateCursorInput = {
+type UpdateCursorInput = {
   accessToken: string
   string: string
 }
