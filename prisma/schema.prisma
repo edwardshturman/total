@@ -21,44 +21,44 @@ model User {
 
 model Item {
   id              String    @id @default(uuid())
-  userId          String
   accessToken     String
   institutionName String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @default(now())
   accounts        Account[] @relation("ItemAccounts")
+  userId          String
   user            User      @relation("UserItems", fields: [userId], references: [id])
 }
 
 model Account {
   id           String        @id @default(uuid())
-  itemId       String
   name         String?
   officialName String
   mask         String?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @default(now())
+  itemId       String
+  item         Item          @relation("ItemAccounts", fields: [itemId], references: [id])
   userId       String
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  item         Item          @relation("ItemAccounts", fields: [itemId], references: [id])
   transactions Transaction[] @relation("AccountTransactions")
+}
+
+model Transaction {
+  id           String   @id @default(uuid())
+  accountId    String
+  currencyCode String
+  amount       Decimal
+  date         DateTime @default(now())
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now())
+  pending      Boolean
+  account      Account  @relation("AccountTransactions", fields: [accountId], references: [id])
 }
 
 model Cursor {
   id          String @id @default(uuid())
   accessToken String @unique
   cursor      String
-}
-
-model Transaction {
-  id            String   @id @default(uuid())
-  accountId     String
-  currencyCode  String
-  amount        Decimal
-  date          DateTime @default(now())
-  name          String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @default(now())
-  pending       Boolean
-  account       Account  @relation("AccountTransactions", fields: [accountId], references: [id])
 }
