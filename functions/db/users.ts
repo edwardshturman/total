@@ -18,11 +18,11 @@ export async function getUserByEmail(email: string) {
   })
 }
 
-export async function createUser(
-  name: string,
-  email: string
-) {
+export async function createUser(user: CreateUserInput) {
   return await prisma.user.create({
-    data: { name, email }
+    data: {
+      name: user.name,
+      email: user.email
+    }
   })
 }

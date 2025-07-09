@@ -13,7 +13,7 @@ export async function createItem(itemInput: CreateItemInput) {
       id: itemInput.id,
       userId: itemInput.userId,
       accessToken: itemInput.accessToken,
-      institutionName: itemInput.institutionName || "",
+      institutionName: itemInput.institutionName || ""
     }
   })
 }
