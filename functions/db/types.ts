@@ -1,10 +1,10 @@
-import { Account, Transaction, User } from "@/generated/prisma";
 
 export type CreateUserInput = {
   Name: string;
   Email: string;
   Image: string | null | undefined;
 }
+import { Account, Transaction, User } from "@/generated/prisma"
 
 export type UserWithAccountsAndTransactions = {
   User: User
@@ -13,12 +13,11 @@ export type UserWithAccountsAndTransactions = {
 }
 
 export type CreateAccountInput = {
-  ID: string;
-  ItemID: string;
-  Name?: string;
-  OfficialName: string;
-  Mask?: string;
-  UserID: string;
+  id: string
+  name: string
+  mask: string
+  userId: string
+  itemId: string
 }
 
 export type CreateItemInput = {
