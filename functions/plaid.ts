@@ -3,9 +3,26 @@ import {
   CountryCode,
   PlaidApi,
   PlaidEnvironments,
-  Products
+  Products,
+  RemovedTransaction,
+  Transaction as PlaidTransaction
 } from "plaid"
+import {
+  createTransaction,
+  deleteTransaction,
+  updateTransaction
+} from "@/functions/db/transactions"
 import { APP_NAME } from "@/lib/constants"
+import { Transaction } from "@/generated/prisma"
+import { Decimal } from "@prisma/client/runtime/library"
+import { createCursor, getCursor, updateCursor } from "@/functions/db/cursors"
+
+if (!process.env.PLAID_CLIENT_ID) {
+  throw new Error("Missing env var PLAID_CLIENT_ID")
+}
+if (!process.env.PLAID_SECRET) {
+  throw new Error("Missing env var PLAID_SECRET")
+}
 
 const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID
 const PLAID_SECRET = process.env.PLAID_SECRET
@@ -19,7 +36,7 @@ const configuration = new Configuration({
     headers: {
       "PLAID-CLIENT-ID": PLAID_CLIENT_ID,
       "PLAID-SECRET": PLAID_SECRET,
-      "Plaid-Version": "2020-09-14",
+      "Plaid-Version": "2020-09-14"
     }
   }
 })
@@ -42,7 +59,6 @@ export async function createLinkToken(userId: string) {
 }
 
 export async function exchangePublicTokenForAccessToken(publicToken: string) {
-  console.log(`Exchanging public_token=${publicToken} for access_token`)
   const response = await client.itemPublicTokenExchange({
     public_token: publicToken
   })
@@ -51,14 +67,80 @@ export async function exchangePublicTokenForAccessToken(publicToken: string) {
   return accessToken
 }
 
-export async function getAccountInfo(accessToken: string) {
-  const accountsResponse = await client.accountsGet({ access_token: accessToken })
-  const accountData = accountsResponse.data.accounts[0]
-  return accountData
+export async function getItem(accessToken: string) {
+  const response = await client.itemGet({ access_token: accessToken })
+  return response.data.item
 }
 
-export async function getTransactions(accessToken: string) {
-  const transactionsResponse = await client.transactionsSync({ access_token: accessToken })
-  const transactionsData = transactionsResponse.data
-  return transactionsData
+export async function getAccounts(accessToken: string) {
+  const accountsResponse = await client.accountsGet({ access_token: accessToken })
+  return accountsResponse.data
+}
+
+function convertPlaidTransactionToDatabaseTransaction(plaidTransaction: PlaidTransaction) {
+  const newTransaction: Transaction = {
+    name: plaidTransaction.name,
+    id: plaidTransaction.transaction_id,
+    accountId: plaidTransaction.account_id,
+    currencyCode: plaidTransaction.iso_currency_code || "",
+    amount: new Decimal(plaidTransaction.amount),
+    date: new Date(plaidTransaction.authorized_date || plaidTransaction.date),
+    pending: plaidTransaction.pending,
+    // TODO: use pending_transaction_id
+    createdAt: new Date(),
+    updatedAt: new Date()
+  }
+  return newTransaction
+}
+
+export async function syncTransactions(accessToken: string) {
+  // Get the Item's associated most recent cursor
+  const cursorEntry = await getCursor(accessToken)
+  let cursor = cursorEntry?.string
+
+  // Aggregate transactions since the last cursor
+  let added: Transaction[] = []
+  let modified: Transaction[] = []
+  let removed: RemovedTransaction[] = []
+  let hasMore = true
+
+  while (hasMore) {
+    const transactions = await client.transactionsSync({
+      access_token: accessToken,
+      cursor
+      // TODO: add support for filtering by account_id
+    })
+    const data = transactions.data
+
+    added = added.concat(data.added.map(convertPlaidTransactionToDatabaseTransaction))
+    modified = modified.concat(data.modified.map(convertPlaidTransactionToDatabaseTransaction))
+    removed = removed.concat(data.removed)
+    hasMore = data.has_more
+    cursor = data.next_cursor
+  }
+
+  // Update database entries
+  // TODO: Promise.all() or something to ensure atomicity
+  const removedIds = removed.map(transaction => transaction.transaction_id)
+  for (const id of removedIds) {
+    await deleteTransaction(id)
+  }
+  for (const modifiedTransaction of modified) {
+    await updateTransaction(modifiedTransaction)
+  }
+  for (const addedTransaction of added) {
+    await createTransaction(addedTransaction)
+  }
+
+  // Save the most recent cursor
+  if (cursor === undefined) {
+    // `data.next_cursor` is always a string and the loop runs at least once
+    throw new Error("Cursor should not be undefined")
+  }
+  if (!cursorEntry) {
+    await createCursor({ accessToken, string: cursor })
+  }
+  else {
+    await updateCursor({ accessToken, string: cursor })
+  }
 }
