@@ -10,15 +10,22 @@ import {
   TransactionsSyncRequest
 } from "plaid"
 import {
-  createTransactions,
-  deleteTransactions,
+  createTransaction,
+  deleteTransaction,
   getTransactions,
-  updateTransactions
+  updateTransaction
 } from "@/functions/db/transactions"
 import { APP_NAME } from "@/lib/constants"
 import { Transaction } from "@/generated/prisma"
 import { Decimal } from "@prisma/client/runtime/library"
 import { createCursor, getCursor, updateCursor } from "@/functions/db/cursors"
+
+if (!process.env.PLAID_CLIENT_ID) {
+  throw new Error("Missing env var PLAID_CLIENT_ID")
+}
+if (!process.env.PLAID_SECRET) {
+  throw new Error("Missing env var PLAID_SECRET")
+}
 
 const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID
 const PLAID_SECRET = process.env.PLAID_SECRET
@@ -125,15 +132,21 @@ export async function syncTransactions(accessToken: string, accountId: string) {
   // Apply changes to database
   if (removed.length > 0) {
     const removedIds = removed.map(r => r.transaction_id)
-    await deleteTransactions(removedIds)
+    for (const transactionId of removedIds) {
+      await deleteTransaction(transactionId)
+    }
   }
 
   if (modified.length > 0) {
-    await updateTransactions(modified)
+    for (const modifiedTransaction of modified) {
+      await updateTransaction(modifiedTransaction)
+    }
   }
 
   if (added.length > 0) {
-    await createTransactions(added)
+    for (const addedTransaction of added) {
+      await createTransaction(addedTransaction)
+    }
   }
 
   // Update cursor
