@@ -31,7 +31,7 @@ model Item {
 
 model Account {
   id           String        @id @default(uuid())
-  name         String?
+  name         String
   mask         String?
   itemId       String
   item         Item          @relation("ItemAccounts", fields: [itemId], references: [id])
