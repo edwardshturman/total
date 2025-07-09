@@ -83,7 +83,7 @@ function convertPlaidTransactionToDatabaseTransaction(plaidTransaction: PlaidTra
     id: plaidTransaction.transaction_id,
     accountId: plaidTransaction.account_id,
     currencyCode: plaidTransaction.iso_currency_code || "",
-    amount: Decimal(plaidTransaction.amount),
+    amount: new Decimal(plaidTransaction.amount),
     date: new Date(plaidTransaction.authorized_date || plaidTransaction.date),
     pending: plaidTransaction.pending,
     // TODO: use pending_transaction_id

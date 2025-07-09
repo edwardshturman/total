@@ -2,9 +2,9 @@
 import { auth, isAuthorized } from "@/lib/auth"
 import { getItems } from "@/functions/db/items"
 import { redirect, unauthorized } from "next/navigation"
-import { getTransactions } from "@/functions/db/transactions"
 import { createUser, getUserByEmail } from "@/functions/db/users"
 import { createLinkToken, getAccounts, syncTransactions } from "@/functions/plaid"
+import { convertTransactionForClient, getTransactions } from "@/functions/db/transactions"
 
 // Components
 import { SignOut } from "@/components/SignOut"
@@ -47,6 +47,7 @@ export default async function Plaid() {
       transactions.push(...accountTransactions)
     }
   }
+  const clientFriendlyTransactions = transactions.map(convertTransactionForClient)
 
   // TODO: After the user connects their accounts, add a new option for "add a new account"
   return (
@@ -61,7 +62,7 @@ export default async function Plaid() {
             userId={user.id}
           />
         :
-          <Transactions transactions={transactions} />
+          <Transactions transactions={clientFriendlyTransactions} />
       }
       <SignOut />
     </>

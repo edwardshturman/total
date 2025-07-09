@@ -1,10 +1,22 @@
 import prisma from "@/functions/db"
 import type { Transaction } from "@/generated/prisma"
 
+export type ClientFriendlyTransaction = Omit<Transaction, "amount"> & {
+  amount: number
+}
+
 export async function getTransactions(accountId: string) {
   return await prisma.transaction.findMany({
     where: { accountId }
   })
+}
+
+export function convertTransactionForClient(transaction: Transaction) {
+  const clientFriendlyTransaction: ClientFriendlyTransaction = {
+    ...transaction,
+    amount: transaction.amount.toNumber()
+  }
+  return clientFriendlyTransaction
 }
 
 export async function deleteTransaction(id: string) {

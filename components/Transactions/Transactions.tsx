@@ -2,8 +2,12 @@
 import { Transaction } from "@/generated/prisma"
 import { useState, useMemo } from "react"
 import { ChevronUp, ChevronDown, Search, Filter } from "lucide-react"
+import { ClientFriendlyTransaction } from "@/functions/db/transactions"
 
-export function Transactions({ transactions }: { transactions: Transaction[] }) {
+export function Transactions(
+  { transactions }:
+  { transactions: ClientFriendlyTransaction[] }
+) {
   const [sortField, setSortField] = useState<keyof Transaction>('date')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [searchQuery, setSearchQuery] = useState('')
@@ -151,15 +155,6 @@ export function Transactions({ transactions }: { transactions: Transaction[] }) 
               <th style={styles.tableHeaderNonClickable}>
                 Status
               </th>
-              <th
-                style={styles.tableHeader}
-                onClick={() => handleSort('id')}
-              >
-                <div style={styles.headerCell}>
-                  Transaction ID
-                  <SortIcon field="id" />
-                </div>
-              </th>
             </tr>
           </thead>
           <tbody style={styles.tableBody}>
@@ -188,11 +183,6 @@ export function Transactions({ transactions }: { transactions: Transaction[] }) 
                     color: transaction.pending ? '#92400e' : '#065f46'
                   }}>
                     {transaction.pending ? 'Pending' : 'Completed'}
-                  </span>
-                </td>
-                <td style={styles.tableCell}>
-                  <span style={styles.transactionId}>
-                    {transaction.id}
                   </span>
                 </td>
               </tr>
