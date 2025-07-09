@@ -1,8 +1,10 @@
 // Functions
 import { auth, isAuthorized } from "@/lib/auth"
+import { getItems } from "@/functions/db/items"
 import { redirect, unauthorized } from "next/navigation"
+import { getTransactions } from "@/functions/db/transactions"
 import { createUser, getUserByEmail } from "@/functions/db/users"
-import { createLinkToken, syncTransactions } from "@/functions/plaid"
+import { createLinkToken, getAccounts, syncTransactions } from "@/functions/plaid"
 
 // Components
 import { SignOut } from "@/components/SignOut"
@@ -18,58 +20,49 @@ export default async function Plaid() {
   const authorized = isAuthorized(session)
   if (!authorized) unauthorized()
 
-  // TODO: verification function for having a full user object
-  console.log(`Creating link token for user ${session!.user!.id!} (${session!.user!.email!})`)
   const linkTokenResponse = await createLinkToken(session!.user!.id!)
-  console.log("linkToken response data:", linkTokenResponse)
 
-  // If the user doesn't have an email in the session, return an error
-  if (!session?.user?.email) {
-    return <p>Error: User email not found in session.</p>
-  }
-
-  // Get the user by the email if they exist, otherwise create a new user
-  let userResponse = await getUserByEmail(session.user.email)
-  if (!userResponse) {
-    userResponse = await createUser({
-      name: session.user.name || "Unknown User",
-      email: session.user.email
+  // TODO: verification function for having a full user object
+  let user = await getUserByEmail(session!.user!.email!)
+  if (!user) {
+    user = await createUser({
+      name: session!.user!.name!,
+      email: session!.user!.email!
     })
   }
 
-  console.log("userResponse: ", userResponse)
+  // Sync transactions across all of the user's accounts
+  const userItems = await getItems(user.id)
+  for (const item of userItems) {
+    const accessToken = item.accessToken
+    await syncTransactions(accessToken)
+  }
 
-  let transactions: Transaction[] = []
-
-  // If this user has items, then sync transactions for each item
-  if (userResponse.items.length > 0) {
-    // Iterate through each item
-    for (const item of userResponse.items) {
-
-      // Get the access token for the item
-      const accessToken = item.accessToken
-
-      // Iterate through each account for the item
-      for (const account of item.accounts) {
-        // Sync the transactions for the account
-        const transactionSyncResponse = await syncTransactions(accessToken, account.id)
-        console.log("transactionSyncResponse: ", transactionSyncResponse)
-        transactions = transactions.concat(transactionSyncResponse)
-      }
+  // Aggregate all transaction across the user's accounts
+  const transactions: Transaction[] = []
+  for (const item of userItems) {
+    const { accounts } = await getAccounts(item.accessToken)
+    for (const account of accounts) {
+      const accountTransactions = await getTransactions(account.account_id)
+      transactions.push(...accountTransactions)
     }
   }
 
   // TODO: After the user connects their accounts, add a new option for "add a new account"
   return (
     <>
-      <p>User: {session.user.email}</p>
+      <p>User: {session!.user!.email!}</p>
       <p>Link token: {linkTokenResponse.link_token}</p>
-      {userResponse.items.length === 0 ? (
-        <PlaidLink userId={userResponse.id} linkToken={linkTokenResponse.link_token} />
-      ) : (
-        <Transactions transactions={transactions}
-        />
-      )}
+      {
+        userItems.length === 0
+        ?
+          <PlaidLink
+            linkToken={linkTokenResponse.link_token}
+            userId={user.id}
+          />
+        :
+          <Transactions transactions={transactions} />
+      }
       <SignOut />
     </>
   )

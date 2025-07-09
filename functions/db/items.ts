@@ -7,7 +7,7 @@ type CreateItemInput = {
   institutionName: string
 }
 
-export async function getUserItems(userId: string) {
+export async function getItems(userId: string) {
   return await prisma.item.findMany({
     where: { userId }
   })

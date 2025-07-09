@@ -1,6 +1,12 @@
 import prisma from "@/functions/db"
 import type { Transaction } from "@/generated/prisma"
 
+export async function getTransactions(accountId: string) {
+  return await prisma.transaction.findMany({
+    where: { accountId }
+  })
+}
+
 export async function deleteTransaction(id: string) {
   return await prisma.transaction.deleteMany({
     where: { id }

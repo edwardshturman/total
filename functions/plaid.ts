@@ -108,6 +108,7 @@ export async function syncTransactions(accessToken: string) {
     const transactions = await client.transactionsSync({
       access_token: accessToken,
       cursor
+      // TODO: add support for filtering by account_id
     })
     const data = transactions.data
 
