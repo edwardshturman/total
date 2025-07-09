@@ -4,8 +4,8 @@ import {
   exchangePublicTokenForAccessToken,
   getAccountInfo,
 } from "@/functions/plaid"
-import { createAccount, createItem } from "./db/mutations"
-import { CreateAccountInput, CreateItemInput } from "./db/types"
+import { createItem, type CreateItemInput } from "@/functions/db/items"
+import { createAccount, type CreateAccountInput } from "@/functions/db/accounts"
 
 export async function exchangePublicTokenForAccessTokenServerAction(
   userId: string,
@@ -22,12 +22,12 @@ export async function exchangePublicTokenForAccessTokenServerAction(
   // Get all the account info
   const accountInfo = await getAccountInfo(accessToken)
 
-  // Create a new item in the database
+  // Create a new Item in the database
   const createItemInput: CreateItemInput = {
-    ID: accountInfo.item.item_id,
-    UserID: userId,
-    AccessToken: accessToken,
-    InstitutionName: accountInfo.item.institution_name || "",
+    id: accountInfo.item.item_id,
+    userId: userId,
+    accessToken: accessToken,
+    institutionName: accountInfo.item.institution_name || ""
   }
   const newItem = await createItem(createItemInput)
   console.log("Created new item: ", newItem)
@@ -35,12 +35,11 @@ export async function exchangePublicTokenForAccessTokenServerAction(
   // Now create accounts for the items
   for (const account of accountInfo.accounts) {
     const newAccountInput: CreateAccountInput = {
-      ID: account.account_id,
-      ItemID: newItem.id,
-      Name: account.name,
-      OfficialName: account.official_name || "",
-      Mask: account.mask || undefined,
-      UserID: userId,
+      id: account.account_id,
+      itemId: newItem.id,
+      name: account.name,
+      mask: account.mask || "",
+      userId: userId
     }
 
     const resp = await createAccount(newAccountInput)

@@ -4,7 +4,7 @@ export type CreateItemInput = {
   id: string
   userId: string
   accessToken: string
-  InstitutionName: string
+  institutionName: string
 }
 
 export async function createItem(itemInput: CreateItemInput) {
@@ -13,7 +13,7 @@ export async function createItem(itemInput: CreateItemInput) {
       id: itemInput.id,
       userId: itemInput.userId,
       accessToken: itemInput.accessToken,
-      institutionName: itemInput.InstitutionName || "",
+      institutionName: itemInput.institutionName || "",
     }
   })
 }
