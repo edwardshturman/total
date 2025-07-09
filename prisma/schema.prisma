@@ -54,7 +54,6 @@ model Transaction {
 }
 
 model Cursor {
-  id          String @id @default(uuid())
-  accessToken String @unique
-  cursor      String
+  accessToken String @id
+  string      String
 }

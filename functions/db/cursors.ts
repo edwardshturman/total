@@ -6,7 +6,7 @@ export type CreateCursorInput = {
 }
 
 export type UpdateCursorInput = {
-  id: string
+  accessToken: string
   cursor: string
 }
 
@@ -27,7 +27,7 @@ export async function createCursor(cursorInput: CreateCursorInput) {
 
 export async function updateCursor(cursorInput: UpdateCursorInput) {
   return await prisma.cursor.update({
-    where: { id: cursorInput.id },
+    where: { accessToken: cursorInput.accessToken },
     data: { cursor: cursorInput.cursor }
   })
 }
