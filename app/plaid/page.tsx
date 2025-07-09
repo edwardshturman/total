@@ -31,14 +31,14 @@ export default async function Plaid() {
     })
   }
 
-  // Sync transactions across all of the user's accounts
+  // Sync transactions from all of the user's accounts
   const userItems = await getItems(user.id)
   for (const item of userItems) {
     const accessToken = item.accessToken
     await syncTransactions(accessToken)
   }
 
-  // Aggregate all transaction across the user's accounts
+  // Aggregate transactions across all of the user's accounts
   const transactions: Transaction[] = []
   for (const item of userItems) {
     const { accounts } = await getAccounts(item.accessToken)
