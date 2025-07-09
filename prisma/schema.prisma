@@ -19,7 +19,7 @@ model User {
 }
 
 model Item {
-  id              String    @id @default(uuid())
+  id              String    @id
   accessToken     String
   institutionName String
   accounts        Account[] @relation("ItemAccounts")
@@ -30,7 +30,7 @@ model Item {
 }
 
 model Account {
-  id           String        @id @default(uuid())
+  id           String        @id
   name         String
   mask         String?
   itemId       String
@@ -41,7 +41,7 @@ model Account {
 }
 
 model Transaction {
-  id           String   @id @default(uuid())
+  id           String   @id
   accountId    String
   currencyCode String
   amount       Decimal
