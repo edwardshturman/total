@@ -22,7 +22,7 @@ model User {
 model Item {
   id              String    @id @default(uuid())
   accessToken     String
-  institutionName String?
+  institutionName String // Item will always have an institution connection
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @default(now())
   accounts        Account[] @relation("ItemAccounts")

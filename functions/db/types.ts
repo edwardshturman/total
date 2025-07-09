@@ -21,10 +21,10 @@ export type CreateAccountInput = {
 }
 
 export type CreateItemInput = {
-  ID: string;
-  UserID: string;
-  AccessToken: string;
-  InstitutionName?: string;
+  id: string
+  userId: string
+  accessToken: string
+  InstitutionName: string
 }
 
 export type CreateCursorInput = {
