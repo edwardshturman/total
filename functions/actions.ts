@@ -2,7 +2,7 @@
 
 import {
   exchangePublicTokenForAccessToken,
-  getAccountInfo,
+  getAccount,
 } from "@/functions/plaid"
 import { createItem, type CreateItemInput } from "@/functions/db/items"
 import { createAccount, type CreateAccountInput } from "@/functions/db/accounts"
@@ -20,7 +20,7 @@ export async function exchangePublicTokenForAccessTokenServerAction(
   }
 
   // Get all the account info
-  const accountInfo = await getAccountInfo(accessToken)
+  const accountInfo = await getAccount(accessToken)
 
   // Create a new Item in the database
   const createItemInput: CreateItemInput = {

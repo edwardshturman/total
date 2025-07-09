@@ -31,10 +31,10 @@ export default async function Plaid() {
   // Get the user by the email if they exist, otherwise create a new user
   let userResponse = await getUserByEmail(session.user.email)
   if (!userResponse) {
-    userResponse = await createUser(
-      session.user.name || "Unknown User",
-      session.user.email
-    )
+    userResponse = await createUser({
+      name: session.user.name || "Unknown User",
+      email: session.user.email
+    })
   }
 
   console.log("userResponse: ", userResponse)

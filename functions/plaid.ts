@@ -1,7 +1,6 @@
 import {
   Configuration,
   CountryCode,
-  ItemGetRequest,
   PlaidApi,
   PlaidEnvironments,
   Products,
@@ -61,45 +60,24 @@ export async function createLinkToken(userId: string) {
   return response.data
 }
 
-export async function exchangePublicTokenForAccessToken(publicToken: string): Promise<string | null> {
-  try {
-    console.log(`Exchanging public_token=${publicToken} for access_token`)
-    const response = await client.itemPublicTokenExchange({
-      public_token: publicToken
-    })
+export async function exchangePublicTokenForAccessToken(publicToken: string) {
+  console.log(`Exchanging public_token=${publicToken} for access_token`)
+  const response = await client.itemPublicTokenExchange({
+    public_token: publicToken
+  })
 
-    const accessToken = response.data.access_token
-    return accessToken
-  } catch (error) {
-    console.error("Error exchanging public token for access token:", error)
-    return null
-  }
+  const accessToken = response.data.access_token
+  return accessToken
 }
 
-export async function getAccountInfo(accessToken: string) {
+export async function getItem(accessToken: string) {
+  const response = await client.itemGet({ access_token: accessToken })
+  return response.data.item
+}
+
+export async function getAccount(accessToken: string) {
   const accountsResponse = await client.accountsGet({ access_token: accessToken })
   return accountsResponse.data
-}
-
-export async function getItem(request: ItemGetRequest) {
-  const response = await client.itemGet(request)
-  const item = response.data.item
-  return item
-}
-
-function convertPlaidTransactionToDatabaseTransaction(plaidTransaction: PlaidTransaction): Transaction {
-  const newTransaction: Transaction = {
-    id: plaidTransaction.transaction_id,
-    accountId: plaidTransaction.account_id,
-    currencyCode: plaidTransaction.iso_currency_code || "",
-    amount: Decimal(plaidTransaction.amount),
-    date: new Date(plaidTransaction.date),
-    name: plaidTransaction.name,
-    pending: plaidTransaction.pending || false,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  }
-  return newTransaction
 }
 
 export async function syncTransactions(accessToken: string, accountId: string) {
@@ -166,4 +144,19 @@ export async function syncTransactions(accessToken: string, accountId: string) {
   const resp = await getTransactions(accountId)
   console.log("returning transactions for accountId:", accountId, resp.length, "transactions found")
   return resp
+}
+
+function convertPlaidTransactionToDatabaseTransaction(plaidTransaction: PlaidTransaction): Transaction {
+  const newTransaction: Transaction = {
+    id: plaidTransaction.transaction_id,
+    accountId: plaidTransaction.account_id,
+    currencyCode: plaidTransaction.iso_currency_code || "",
+    amount: Decimal(plaidTransaction.amount),
+    date: new Date(plaidTransaction.date),
+    name: plaidTransaction.name,
+    pending: plaidTransaction.pending || false,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  }
+  return newTransaction
 }
