@@ -2,12 +2,12 @@ import prisma from "@/functions/db"
 
 export type CreateCursorInput = {
   accessToken: string
-  cursor: string
+  string: string
 }
 
 export type UpdateCursorInput = {
   accessToken: string
-  cursor: string
+  string: string
 }
 
 export async function getCursor(accessToken: string) {
@@ -20,7 +20,7 @@ export async function createCursor(cursorInput: CreateCursorInput) {
   return await prisma.cursor.create({
     data: {
       accessToken: cursorInput.accessToken,
-      cursor: cursorInput.cursor
+      string: cursorInput.string
     }
   })
 }
@@ -28,6 +28,6 @@ export async function createCursor(cursorInput: CreateCursorInput) {
 export async function updateCursor(cursorInput: UpdateCursorInput) {
   return await prisma.cursor.update({
     where: { accessToken: cursorInput.accessToken },
-    data: { cursor: cursorInput.cursor }
+    data: { string: cursorInput.string }
   })
 }

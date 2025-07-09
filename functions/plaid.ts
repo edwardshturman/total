@@ -10,7 +10,6 @@ import {
 import {
   createTransaction,
   deleteTransaction,
-  getTransactions,
   updateTransaction
 } from "@/functions/db/transactions"
 import { APP_NAME } from "@/lib/constants"
@@ -139,9 +138,9 @@ export async function syncTransactions(accessToken: string) {
     throw new Error("Cursor should not be undefined")
   }
   if (!cursorEntry) {
-    await createCursor({ accessToken, cursor })
+    await createCursor({ accessToken, string: cursor })
   }
   else {
-    await updateCursor({ accessToken, cursor })
+    await updateCursor({ accessToken, string: cursor })
   }
 }
