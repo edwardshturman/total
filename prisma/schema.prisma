@@ -9,38 +9,35 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(uuid())
+  id        String   @id @default(uuid())
   name      String
-  email     String    @unique
+  email     String   @unique
   image     String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now())
-  items     Item[]    @relation("UserItems")
-  Account   Account[]
+  items     Item[]   @relation("UserItems")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }
 
 model Item {
   id              String    @id @default(uuid())
   accessToken     String
   institutionName String
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @default(now())
   accounts        Account[] @relation("ItemAccounts")
   userId          String
   user            User      @relation("UserItems", fields: [userId], references: [id])
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @default(now())
 }
 
 model Account {
   id           String        @id @default(uuid())
   name         String?
   mask         String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @default(now())
   itemId       String
   item         Item          @relation("ItemAccounts", fields: [itemId], references: [id])
-  userId       String
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[] @relation("AccountTransactions")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @default(now())
 }
 
 model Transaction {
@@ -50,10 +47,10 @@ model Transaction {
   amount       Decimal
   date         DateTime @default(now())
   name         String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @default(now())
   pending      Boolean
   account      Account  @relation("AccountTransactions", fields: [accountId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now())
 }
 
 model Cursor {
