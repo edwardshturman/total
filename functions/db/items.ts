@@ -1,16 +1,17 @@
-import prisma from "@/functions/db"
+import prisma from "@/functions/db";
 
 type CreateItemInput = {
-  id: string
-  userId: string
-  accessToken: string
-  institutionName: string
-}
+  id: string;
+  userId: string;
+  accessToken: string;
+  encryptionKeyVersion: string;
+  institutionName: string;
+};
 
 export async function getItems(userId: string) {
   return await prisma.item.findMany({
-    where: { userId }
-  })
+    where: { userId },
+  });
 }
 
 export async function createItem(itemInput: CreateItemInput) {
@@ -19,7 +20,8 @@ export async function createItem(itemInput: CreateItemInput) {
       id: itemInput.id,
       userId: itemInput.userId,
       accessToken: itemInput.accessToken,
-      institutionName: itemInput.institutionName
-    }
-  })
+      encryptionKeyVersion: itemInput.encryptionKeyVersion,
+      institutionName: itemInput.institutionName,
+    },
+  });
 }
