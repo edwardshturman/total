@@ -19,14 +19,15 @@ model User {
 }
 
 model Item {
-  id              String    @id
-  accessToken     String
-  institutionName String
-  accounts        Account[] @relation("ItemAccounts")
-  userId          String
-  user            User      @relation("UserItems", fields: [userId], references: [id])
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @default(now())
+  id                   String    @id
+  accessToken          String
+  encryptionKeyVersion String
+  institutionName      String
+  accounts             Account[] @relation("ItemAccounts")
+  userId               String
+  user                 User      @relation("UserItems", fields: [userId], references: [id])
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @default(now())
 }
 
 model Account {
