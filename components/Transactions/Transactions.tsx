@@ -1,23 +1,29 @@
 "use client"
-import { Transaction } from "@/generated/prisma"
-import { useState, useMemo } from "react"
-import { ChevronUp, ChevronDown, Search, Filter } from "lucide-react"
+import { Account, Transaction } from "@/generated/prisma"
+import { useState, useMemo, useEffect } from "react"
+import { ChevronUp, ChevronDown, Search } from "lucide-react"
 import { ClientFriendlyTransaction } from "@/functions/db/transactions"
+import FilterDropdown from "./FilterDropdown"
 
 export function Transactions(
-  { transactions }:
-  { transactions: ClientFriendlyTransaction[] }
+  { initialTransactions, accounts }:
+    { initialTransactions: ClientFriendlyTransaction[], accounts: Account[] }
 ) {
+  const [transactions, setTransactions] = useState<ClientFriendlyTransaction[]>(initialTransactions)
+  const [selectedAccounts, setSelectedAccounts] = useState<Account[]>(accounts)
   const [sortField, setSortField] = useState<keyof Transaction>('date')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [searchQuery, setSearchQuery] = useState('')
   const [showPendingOnly, setShowPendingOnly] = useState(false)
   const filteredAndSortedTransactions = useMemo(() => {
     const filtered = transactions.filter(transaction => {
+      // Filter transactions based on the search query and selected accounts
+      const selectedAccountIds = selectedAccounts.map(account => account.id)
       const matchesSearch = transaction.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         transaction.id.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesPending = showPendingOnly ? transaction.pending : true
-      return matchesSearch && matchesPending
+      const selectedAccountMatch = selectedAccounts.length === 0 || selectedAccountIds.includes(transaction.accountId)
+      return matchesSearch && matchesPending && selectedAccountMatch
     })
 
     return filtered.sort((a, b) => {
@@ -45,7 +51,7 @@ export function Transactions(
         return stringB.localeCompare(stringA)
       }
     })
-  }, [transactions, sortField, sortDirection, searchQuery, showPendingOnly])
+  }, [transactions, sortField, sortDirection, searchQuery, showPendingOnly, selectedAccounts])
 
   const handleSort = (field: keyof Transaction) => {
     if (sortField === field) {
@@ -106,7 +112,7 @@ export function Transactions(
             />
           </div>
           <div style={styles.checkboxContainer}>
-            <Filter style={styles.filterIcon} />
+            <FilterDropdown accounts={accounts} selectedAccounts={selectedAccounts} setSelectedAccounts={setSelectedAccounts} />
             <label style={styles.checkboxLabel}>
               <input
                 type="checkbox"
@@ -249,7 +255,7 @@ const styles = {
     left: '12px',
     top: '50%',
     transform: 'translateY(-50%)',
-    color: '#9ca3af',
+    color: '#000000',
     width: '16px',
     height: '16px'
   },
@@ -259,9 +265,11 @@ const styles = {
     paddingRight: '16px',
     paddingTop: '8px',
     paddingBottom: '8px',
-    border: '1px solid #d1d5db',
+    border: '1px solid #000000',
     borderRadius: '6px',
     fontSize: '14px',
+    backgroundColor: '#ffffff',
+    color: "#000000",
     outline: 'none',
     boxSizing: 'border-box' as const,
     transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
