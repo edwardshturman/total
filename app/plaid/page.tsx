@@ -12,7 +12,8 @@ import { PlaidLink } from "@/components/PlaidLink"
 import { Transactions } from "@/components/Transactions"
 
 // Types
-import type { Transaction } from "@/generated/prisma"
+import type { Account, Transaction } from "@/generated/prisma"
+import { getAccountsByItemId } from "@/functions/db/accounts"
 
 export default async function Plaid() {
   const session = await auth()
@@ -33,9 +34,14 @@ export default async function Plaid() {
 
   // Sync transactions from all of the user's accounts
   const userItems = await getItems(user.id)
+  const accounts: Account[] = []
   for (const item of userItems) {
     const accessToken = item.accessToken
     await syncTransactions(accessToken)
+
+    // Get accounts for each item and add them to the accounts array
+    const accountForItemId = await getAccountsByItemId(item.id)
+    accounts.push(...accountForItemId)
   }
 
   // Aggregate transactions across all of the user's accounts
@@ -56,13 +62,13 @@ export default async function Plaid() {
       <p>Link token: {linkTokenResponse.link_token}</p>
       {
         userItems.length === 0
-        ?
+          ?
           <PlaidLink
             linkToken={linkTokenResponse.link_token}
             userId={user.id}
           />
-        :
-          <Transactions transactions={clientFriendlyTransactions} />
+          :
+          <Transactions initialTransactions={clientFriendlyTransactions} accounts={accounts} />
       }
       <SignOut />
     </>
