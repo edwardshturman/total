@@ -82,15 +82,10 @@ export class GCM {
   }
 }
 
-// TODO: Add decrypt func
-
-export function encryptWithEnvKeys(plainText: string): {
+export function encryptAccessToken(plainText: string, encryptionKey: string, encryptionKeyVersion: string): {
   cipherText: string;
-  keyVersion: string;
+  keyVersion: string
 } {
-  // Pull encryption key and version from env
-  const encryptionKey = process.env.KEY_IN_USE || "";
-  const encryptionKeyVersion = process.env.KEY_VERSION || "";
 
   // GCM class handles missing/invalid keys, but version is also a must
   if (!encryptionKey || !encryptionKeyVersion)
@@ -100,4 +95,19 @@ export function encryptWithEnvKeys(plainText: string): {
   const encrypted = new GCM(encryptionKey).encrypt(plainText);
 
   return { cipherText: encrypted, keyVersion: encryptionKeyVersion };
+}
+
+export function decryptAccessToken(cipherText: string, encryptionKey: string, encryptionKeyVersion: string): { 
+  plainText: string; 
+  keyVersion: string 
+} {
+
+  // GCM class handles missing/invalid keys, but version is also a must
+  if (!encryptionKey || !encryptionKeyVersion)
+    throw new Error("Missing encryption key or key version!");
+
+  // Encrypt token prior to DB insert
+  const decrypted = new GCM(encryptionKey).decrypt(cipherText);
+
+  return { plainText: decrypted, keyVersion: encryptionKeyVersion }; 
 }
