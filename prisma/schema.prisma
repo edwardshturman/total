@@ -28,6 +28,7 @@ model Item {
   user                 User      @relation("UserItems", fields: [userId], references: [id])
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @default(now())
+  cursor               Cursor?   @relation(fields: [id], references: [id])
 }
 
 model Account {
@@ -55,6 +56,9 @@ model Transaction {
 }
 
 model Cursor {
-  accessToken String @id
-  string      String
+  id        String   @id
+  string    String
+  Item      Item[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
