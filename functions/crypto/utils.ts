@@ -82,6 +82,8 @@ export class GCM {
   }
 }
 
+// TODO: Add decrypt func
+
 export function encryptWithEnvKeys(plainText: string): {
   cipherText: string;
   keyVersion: string;
