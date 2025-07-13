@@ -6,7 +6,7 @@ import {
 } from "@/functions/plaid";
 import { createItem } from "@/functions/db/items";
 import { createAccount } from "@/functions/db/accounts";
-import { encryptWithEnvKeys } from "./crypto/utils";
+import { encryptAccessToken } from "./crypto/utils";
 
 export async function exchangePublicTokenForAccessTokenServerAction(
   userId: string,
@@ -17,8 +17,12 @@ export async function exchangePublicTokenForAccessTokenServerAction(
   // Add the Item to the database
   const { item, accounts } = await getAccounts(accessToken);
 
+  // Pull encryption key and version from env
+  const encryptionKey = process.env.KEY_IN_USE || "";
+  const keyVersion = process.env.KEY_VERSION || "";
+
   const { cipherText: encryptedAccessToken, keyVersion: encryptionKeyVersion } =
-    encryptWithEnvKeys(accessToken);
+    encryptAccessToken(accessToken, encryptionKey, keyVersion);
 
   await createItem({
     id: item.item_id,
