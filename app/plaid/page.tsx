@@ -12,6 +12,7 @@ import {
   convertTransactionForClient,
   getTransactions,
 } from "@/functions/db/transactions";
+import { decryptAccessToken } from "@/functions/crypto/utils";
 
 // Components
 import { SignOut } from "@/components/SignOut";
@@ -38,21 +39,23 @@ export default async function Plaid() {
     });
   }
 
-  // TODO: clean this up, why are we iterating through userItems twice? Also two decrypt calls adds unnecessary overhead
+  // Pull encryption key and version from env
+  const encryptionKey = process.env.KEY_IN_USE || "";
+  const keyVersion = process.env.KEY_VERSION || "";
 
-  // Sync transactions from all of the user's accounts
+  // Sync and aggregate transactions from all of the user's accounts
   const userItems = await getItems(user.id);
-  for (const item of userItems) {
-    // TODO!!! Here decrypt access token
-    const accessToken = item.accessToken;
-    await syncTransactions(accessToken);
-  }
-
-  // Aggregate transactions across all of the user's accounts
   const transactions: Transaction[] = [];
   for (const item of userItems) {
-    // TODO!!! Decrypt again
-    const { accounts } = await getAccounts(item.accessToken);
+    const encryptedAccessToken = item.accessToken;
+    const { plainText: accessToken } = decryptAccessToken(
+      encryptedAccessToken,
+      encryptionKey,
+      keyVersion
+    );
+    await syncTransactions(accessToken);
+
+    const { accounts } = await getAccounts(accessToken);
     for (const account of accounts) {
       const accountTransactions = await getTransactions(account.account_id);
       transactions.push(...accountTransactions);
