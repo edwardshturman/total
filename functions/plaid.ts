@@ -95,7 +95,14 @@ function convertPlaidTransactionToDatabaseTransaction(plaidTransaction: PlaidTra
 
 export async function syncTransactions(accessToken: string) {
   // Get the Item's associated most recent cursor
-  const cursorEntry = await getCursor(accessToken)
+
+  const item = await getItem(accessToken)
+  const itemId = item?.item_id
+  if (itemId == null) { 
+    throw new Error("itemId is missing!") 
+  }
+
+  const cursorEntry = await getCursor(itemId)
   let cursor = cursorEntry?.string
 
   // Aggregate transactions since the last cursor
@@ -138,9 +145,9 @@ export async function syncTransactions(accessToken: string) {
     throw new Error("Cursor should not be undefined")
   }
   if (!cursorEntry) {
-    await createCursor({ accessToken, string: cursor })
+    await createCursor({ itemId, string: cursor })
   }
   else {
-    await updateCursor({ accessToken, string: cursor })
+    await updateCursor({ itemId, string: cursor })
   }
 }

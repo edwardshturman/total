@@ -19,7 +19,7 @@ model User {
 }
 
 model Item {
-  id                   String    @id
+  id                   String    @id @default(cuid())
   accessToken          String
   encryptionKeyVersion String
   institutionName      String
@@ -28,8 +28,8 @@ model Item {
   user                 User      @relation("UserItems", fields: [userId], references: [id])
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @default(now())
-  cursor               Cursor?   @relation(fields: [cursorId], references: [id])
-  cursorId             String?
+
+  cursor Cursor? @relation("ItemToCursor")
 }
 
 model Account {
@@ -59,8 +59,8 @@ model Transaction {
 model Cursor {
   id        String   @id @default(cuid())
   itemId    String   @unique
+  item      Item     @relation("ItemToCursor", fields: [itemId], references: [id])
   string    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  Item      Item[]
 }
