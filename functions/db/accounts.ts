@@ -17,3 +17,11 @@ export async function createAccount(accountInput: CreateAccountInput) {
     }
   })
 }
+
+export async function getAccountsByItemId(itemId: string) {
+  return await prisma.account.findMany({
+    where: {
+      itemId: itemId,
+    }
+  })
+}
