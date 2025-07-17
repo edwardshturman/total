@@ -19,8 +19,8 @@ import { SignOut } from "@/components/SignOut";
 import { PlaidLink } from "@/components/PlaidLink";
 import { Transactions } from "@/components/Transactions";
 
-// Types
-import type { Transaction } from "@/generated/prisma";
+import type { Account, Transaction } from "@/generated/prisma";
+import { getAccountsByItemId } from "@/functions/db/accounts";
 
 export default async function Plaid() {
   const session = await auth();
@@ -39,13 +39,15 @@ export default async function Plaid() {
     });
   }
 
+  const accounts: Account[] = [];
+  const transactions: Transaction[] = [];
+
   // Pull encryption key and version from env
   const encryptionKey = process.env.KEY_IN_USE || "";
   const keyVersion = process.env.KEY_VERSION || "";
 
   // Sync and aggregate transactions from all of the user's accounts
   const userItems = await getItems(user.id);
-  const transactions: Transaction[] = [];
   for (const item of userItems) {
     const encryptedAccessToken = item.accessToken;
     const { plainText: accessToken } = decryptAccessToken(
@@ -53,10 +55,14 @@ export default async function Plaid() {
       encryptionKey,
       keyVersion
     );
+
     await syncTransactions(accessToken);
 
-    const { accounts } = await getAccounts(accessToken);
-    for (const account of accounts) {
+    const accountForItemId = await getAccountsByItemId(item.id);
+    accounts.push(...accountForItemId);
+
+    const { accounts: accountsFromItem } = await getAccounts(accessToken);
+    for (const account of accountsFromItem) {
       const accountTransactions = await getTransactions(account.account_id);
       transactions.push(...accountTransactions);
     }
@@ -74,7 +80,10 @@ export default async function Plaid() {
       {userItems.length === 0 ? (
         <PlaidLink linkToken={linkTokenResponse.link_token} userId={user.id} />
       ) : (
-        <Transactions transactions={clientFriendlyTransactions} />
+        <Transactions
+          initialTransactions={clientFriendlyTransactions}
+          accounts={accounts}
+        />
       )}
       <SignOut />
     </>
