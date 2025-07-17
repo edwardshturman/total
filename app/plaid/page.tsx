@@ -62,6 +62,7 @@ export default async function Plaid() {
     accounts.push(...accountForItemId);
 
     const { accounts: accountsFromItem } = await getAccounts(accessToken);
+
     for (const account of accountsFromItem) {
       const accountTransactions = await getTransactions(account.account_id);
       transactions.push(...accountTransactions);
