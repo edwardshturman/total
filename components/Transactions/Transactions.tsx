@@ -1,106 +1,106 @@
-"use client";
-import { Account, Transaction } from "@/generated/prisma";
-import { useState, useMemo } from "react";
-import { ChevronUp, ChevronDown, Search } from "lucide-react";
-import { ClientFriendlyTransaction } from "@/functions/db/transactions";
-import FilterDropdown from "./FilterDropdown";
+"use client"
+import { Account, Transaction } from "@/generated/prisma"
+import { useState, useMemo } from "react"
+import { ChevronUp, ChevronDown, Search } from "lucide-react"
+import { ClientFriendlyTransaction } from "@/functions/db/transactions"
+import FilterDropdown from "./FilterDropdown"
 
 export function Transactions({
   initialTransactions,
-  accounts,
+  accounts
 }: {
-  initialTransactions: ClientFriendlyTransaction[];
-  accounts: Account[];
+  initialTransactions: ClientFriendlyTransaction[]
+  accounts: Account[]
 }) {
   const [transactions] =
-    useState<ClientFriendlyTransaction[]>(initialTransactions);
-  const [selectedAccounts, setSelectedAccounts] = useState<Account[]>(accounts);
-  const [sortField, setSortField] = useState<keyof Transaction>("date");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showPendingOnly, setShowPendingOnly] = useState(false);
+    useState<ClientFriendlyTransaction[]>(initialTransactions)
+  const [selectedAccounts, setSelectedAccounts] = useState<Account[]>(accounts)
+  const [sortField, setSortField] = useState<keyof Transaction>("date")
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [showPendingOnly, setShowPendingOnly] = useState(false)
   const filteredAndSortedTransactions = useMemo(() => {
     const filtered = transactions.filter((transaction) => {
       // Filter transactions based on the search query and selected accounts
-      const selectedAccountIds = selectedAccounts.map((account) => account.id);
+      const selectedAccountIds = selectedAccounts.map((account) => account.id)
       const matchesSearch =
         transaction.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        transaction.id.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesPending = showPendingOnly ? transaction.pending : true;
+        transaction.id.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesPending = showPendingOnly ? transaction.pending : true
       const selectedAccountMatch =
         selectedAccounts.length === 0 ||
-        selectedAccountIds.includes(transaction.accountId);
-      return matchesSearch && matchesPending && selectedAccountMatch;
-    });
+        selectedAccountIds.includes(transaction.accountId)
+      return matchesSearch && matchesPending && selectedAccountMatch
+    })
 
     return filtered.sort((a, b) => {
-      const aValue = a[sortField];
-      const bValue = b[sortField];
+      const aValue = a[sortField]
+      const bValue = b[sortField]
 
       if (sortField === "date") {
-        const dateA = new Date(aValue as string).getTime();
-        const dateB = new Date(bValue as string).getTime();
-        return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
+        const dateA = new Date(aValue as string).getTime()
+        const dateB = new Date(bValue as string).getTime()
+        return sortDirection === "asc" ? dateA - dateB : dateB - dateA
       }
 
       if (sortField === "amount") {
-        const amountA = parseFloat(aValue as string);
-        const amountB = parseFloat(bValue as string);
-        return sortDirection === "asc" ? amountA - amountB : amountB - amountA;
+        const amountA = parseFloat(aValue as string)
+        const amountB = parseFloat(bValue as string)
+        return sortDirection === "asc" ? amountA - amountB : amountB - amountA
       }
 
-      const stringA = String(aValue).toLowerCase();
-      const stringB = String(bValue).toLowerCase();
+      const stringA = String(aValue).toLowerCase()
+      const stringB = String(bValue).toLowerCase()
 
       if (sortDirection === "asc") {
-        return stringA.localeCompare(stringB);
+        return stringA.localeCompare(stringB)
       } else {
-        return stringB.localeCompare(stringA);
+        return stringB.localeCompare(stringA)
       }
-    });
+    })
   }, [
     transactions,
     sortField,
     sortDirection,
     searchQuery,
     showPendingOnly,
-    selectedAccounts,
-  ]);
+    selectedAccounts
+  ])
 
   const handleSort = (field: keyof Transaction) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
     } else {
-      setSortField(field);
-      setSortDirection("desc");
+      setSortField(field)
+      setSortDirection("desc")
     }
-  };
+  }
 
   const formatCurrency = (amount: string, currencyCode: string) => {
-    const numAmount = parseFloat(amount);
+    const numAmount = parseFloat(amount)
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: currencyCode,
-      minimumFractionDigits: 2,
-    }).format(numAmount);
-  };
+      minimumFractionDigits: 2
+    }).format(numAmount)
+  }
 
   const formatDate = (date: string | Date) => {
     return new Date(date).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
-      day: "numeric",
-    });
-  };
+      day: "numeric"
+    })
+  }
 
   const SortIcon = ({ field }: { field: keyof Transaction }) => {
-    if (sortField !== field) return null;
+    if (sortField !== field) return null
     return sortDirection === "asc" ? (
       <ChevronUp style={{ width: "16px", height: "16px" }} />
     ) : (
       <ChevronDown style={{ width: "16px", height: "16px" }} />
-    );
-  };
+    )
+  }
 
   return (
     <div style={styles.container}>
@@ -192,7 +192,7 @@ export function Transactions({
                       color:
                         parseFloat(transaction.amount.toString()) >= 0
                           ? "#059669"
-                          : "#dc2626",
+                          : "#dc2626"
                     }}
                   >
                     {formatCurrency(
@@ -208,7 +208,7 @@ export function Transactions({
                       backgroundColor: transaction.pending
                         ? "#fef3c7"
                         : "#d1fae5",
-                      color: transaction.pending ? "#92400e" : "#065f46",
+                      color: transaction.pending ? "#92400e" : "#065f46"
                     }}
                   >
                     {transaction.pending ? "Pending" : "Completed"}
@@ -231,7 +231,7 @@ export function Transactions({
         </div>
       )}
     </div>
-  );
+  )
 }
 
 const styles = {
@@ -241,40 +241,40 @@ const styles = {
     boxShadow:
       "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
     border: "1px solid #e5e7eb",
-    overflow: "hidden",
+    overflow: "hidden"
   },
   header: {
     padding: "24px",
-    borderBottom: "1px solid #e5e7eb",
+    borderBottom: "1px solid #e5e7eb"
   },
   headerContent: {
     display: "flex",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "space-between"
   },
   title: {
     fontSize: "20px",
     fontWeight: "600",
     color: "#111827",
-    margin: 0,
+    margin: 0
   },
   subtitle: {
     fontSize: "14px",
-    color: "#6b7280",
+    color: "#6b7280"
   },
   filtersContainer: {
     padding: "16px 24px",
     borderBottom: "1px solid #e5e7eb",
-    backgroundColor: "#f9fafb",
+    backgroundColor: "#f9fafb"
   },
   filtersContent: {
     display: "flex",
     flexDirection: "column" as const,
-    gap: "16px",
+    gap: "16px"
   },
   searchContainer: {
     flex: 1,
-    position: "relative" as const,
+    position: "relative" as const
   },
   searchIcon: {
     position: "absolute" as const,
@@ -283,7 +283,7 @@ const styles = {
     transform: "translateY(-50%)",
     color: "#000000",
     width: "16px",
-    height: "16px",
+    height: "16px"
   },
   searchInput: {
     width: "100%",
@@ -298,17 +298,17 @@ const styles = {
     color: "#000000",
     outline: "none",
     boxSizing: "border-box" as const,
-    transition: "border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out",
+    transition: "border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out"
   },
   checkboxContainer: {
     display: "flex",
     alignItems: "center",
-    gap: "8px",
+    gap: "8px"
   },
   filterIcon: {
     width: "16px",
     height: "16px",
-    color: "#9ca3af",
+    color: "#9ca3af"
   },
   checkboxLabel: {
     display: "flex",
@@ -316,23 +316,23 @@ const styles = {
     gap: "8px",
     fontSize: "14px",
     color: "#374151",
-    cursor: "pointer",
+    cursor: "pointer"
   },
   checkbox: {
     borderRadius: "4px",
     border: "1px solid #d1d5db",
     color: "#2563eb",
-    cursor: "pointer",
+    cursor: "pointer"
   },
   tableContainer: {
-    overflowX: "auto" as const,
+    overflowX: "auto" as const
   },
   table: {
     width: "100%",
-    borderCollapse: "collapse" as const,
+    borderCollapse: "collapse" as const
   },
   tableHead: {
-    backgroundColor: "#f9fafb",
+    backgroundColor: "#f9fafb"
   },
   tableHeader: {
     padding: "12px 24px",
@@ -343,7 +343,7 @@ const styles = {
     textTransform: "uppercase" as const,
     letterSpacing: "0.05em",
     cursor: "pointer",
-    transition: "background-color 0.15s ease-in-out",
+    transition: "background-color 0.15s ease-in-out"
   },
   tableHeaderNonClickable: {
     padding: "12px 24px",
@@ -352,54 +352,54 @@ const styles = {
     fontWeight: "500",
     color: "#6b7280",
     textTransform: "uppercase" as const,
-    letterSpacing: "0.05em",
+    letterSpacing: "0.05em"
   },
   headerCell: {
     display: "flex",
     alignItems: "center",
-    gap: "4px",
+    gap: "4px"
   },
   tableBody: {
     backgroundColor: "#ffffff",
-    divide: "1px solid #e5e7eb",
+    divide: "1px solid #e5e7eb"
   },
   tableRow: {
     borderBottom: "1px solid #e5e7eb",
     transition: "background-color 0.15s ease-in-out",
-    cursor: "default",
+    cursor: "default"
   },
   tableCell: {
     padding: "16px 24px",
     fontSize: "14px",
     color: "#111827",
-    whiteSpace: "nowrap" as const,
+    whiteSpace: "nowrap" as const
   },
   descriptionCell: {
     maxWidth: "300px",
     overflow: "hidden",
     textOverflow: "ellipsis",
-    whiteSpace: "nowrap" as const,
+    whiteSpace: "nowrap" as const
   },
   amountCell: {
-    fontWeight: "500",
+    fontWeight: "500"
   },
   statusBadge: {
     display: "inline-flex",
     padding: "4px 8px",
     fontSize: "12px",
     fontWeight: "600",
-    borderRadius: "9999px",
+    borderRadius: "9999px"
   },
   transactionId: {
     fontFamily: "monospace",
-    color: "#6b7280",
+    color: "#6b7280"
   },
   emptyState: {
     textAlign: "center" as const,
-    padding: "48px 0",
+    padding: "48px 0"
   },
   emptyStateText: {
     color: "#6b7280",
-    fontSize: "14px",
-  },
-};
+    fontSize: "14px"
+  }
+}

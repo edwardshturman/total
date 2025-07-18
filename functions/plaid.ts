@@ -73,11 +73,15 @@ export async function getItem(accessToken: string) {
 }
 
 export async function getAccounts(accessToken: string) {
-  const accountsResponse = await client.accountsGet({ access_token: accessToken })
+  const accountsResponse = await client.accountsGet({
+    access_token: accessToken
+  })
   return accountsResponse.data
 }
 
-function convertPlaidTransactionToDatabaseTransaction(plaidTransaction: PlaidTransaction) {
+function convertPlaidTransactionToDatabaseTransaction(
+  plaidTransaction: PlaidTransaction
+) {
   const newTransaction: Transaction = {
     name: plaidTransaction.name,
     id: plaidTransaction.transaction_id,
@@ -98,8 +102,8 @@ export async function syncTransactions(accessToken: string) {
 
   const item = await getItem(accessToken)
   const itemId = item?.item_id
-  if (itemId == null) { 
-    throw new Error("itemId is missing!") 
+  if (itemId == null) {
+    throw new Error("itemId is missing!")
   }
 
   const cursorEntry = await getCursor(itemId)
@@ -119,8 +123,12 @@ export async function syncTransactions(accessToken: string) {
     })
     const data = transactions.data
 
-    added = added.concat(data.added.map(convertPlaidTransactionToDatabaseTransaction))
-    modified = modified.concat(data.modified.map(convertPlaidTransactionToDatabaseTransaction))
+    added = added.concat(
+      data.added.map(convertPlaidTransactionToDatabaseTransaction)
+    )
+    modified = modified.concat(
+      data.modified.map(convertPlaidTransactionToDatabaseTransaction)
+    )
     removed = removed.concat(data.removed)
     hasMore = data.has_more
     cursor = data.next_cursor
@@ -128,7 +136,7 @@ export async function syncTransactions(accessToken: string) {
 
   // Update database entries
   // TODO: Promise.all() or something to ensure atomicity
-  const removedIds = removed.map(transaction => transaction.transaction_id)
+  const removedIds = removed.map((transaction) => transaction.transaction_id)
   for (const id of removedIds) {
     await deleteTransaction(id)
   }
@@ -146,8 +154,7 @@ export async function syncTransactions(accessToken: string) {
   }
   if (!cursorEntry) {
     await createCursor({ itemId, string: cursor })
-  }
-  else {
+  } else {
     await updateCursor({ itemId, string: cursor })
   }
 }
