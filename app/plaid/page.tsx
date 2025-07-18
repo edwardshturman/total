@@ -40,7 +40,6 @@ export default async function Plaid() {
     })
   }
 
-  // Sync and aggregate transactions from all of the user's accounts
   const accounts: Account[] = []
   const transactions: Transaction[] = []
   const userItems = await getItems(user.id)
@@ -54,19 +53,20 @@ export default async function Plaid() {
       keyVersion
     )
 
-    // Refresh transactions across all accounts for the given Item
+    // Sync transactions from Plaid → db, across all accounts for the given Item
     await syncTransactions(accessToken)
 
-    const accountForItemId = await getAccountsByItemId(item.id)
-    accounts.push(...accountForItemId)
+    // Add accounts for the given Item to user's available accounts for filtering
+    const itemAccounts = await getAccountsByItemId(item.id)
+    accounts.push(...itemAccounts)
 
+    // Aggregate transactions across Item accounts for rendering
     const { accounts: accountsFromItem } = await getAccounts(accessToken)
     for (const account of accountsFromItem) {
       const accountTransactions = await getTransactions(account.account_id)
       transactions.push(...accountTransactions)
     }
   }
-
   const clientFriendlyTransactions = transactions.map(
     convertTransactionForClient
   )

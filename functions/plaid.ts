@@ -99,10 +99,9 @@ function convertPlaidTransactionToDatabaseTransaction(
 
 export async function syncTransactions(accessToken: string) {
   // Get the Item's associated most recent cursor
-
   const item = await getItem(accessToken)
   const itemId = item?.item_id
-  if (itemId == null) {
+  if (!itemId) {
     throw new Error("itemId is missing!")
   }
 
