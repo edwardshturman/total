@@ -11,9 +11,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "pretty": "prettier . --check",
+    "prebuild": "bun run pretty",
+    "lint": "next lint",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
     "postinstall": "prisma generate",
     "migrate": "dotenv -e .env.local prisma migrate dev",
     "refresh": "git pull && vc env pull"
@@ -36,6 +38,8 @@
     "dotenv-cli": "8.0.0",
     "eslint": "9.28.0",
     "eslint-config-next": "15.3.3",
+    "eslint-config-prettier": "10.1.5",
+    "prettier": "3.6.2",
     "prisma": "6.10.1",
     "typescript": "5.8.3"
   }
