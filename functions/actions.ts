@@ -2,7 +2,7 @@
 
 import {
   exchangePublicTokenForAccessToken,
-  getAccounts,
+  getAccounts
 } from "@/functions/plaid"
 import { createItem } from "@/functions/db/items"
 import { createAccount } from "@/functions/db/accounts"

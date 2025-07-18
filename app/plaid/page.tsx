@@ -2,9 +2,17 @@
 import { auth, isAuthorized } from "@/lib/auth"
 import { getItems } from "@/functions/db/items"
 import { redirect, unauthorized } from "next/navigation"
+import { getAccountsByItemId } from "@/functions/db/accounts"
 import { createUser, getUserByEmail } from "@/functions/db/users"
-import { createLinkToken, getAccounts, syncTransactions } from "@/functions/plaid"
-import { convertTransactionForClient, getTransactions } from "@/functions/db/transactions"
+import {
+  createLinkToken,
+  getAccounts,
+  syncTransactions
+} from "@/functions/plaid"
+import {
+  convertTransactionForClient,
+  getTransactions
+} from "@/functions/db/transactions"
 
 // Components
 import { SignOut } from "@/components/SignOut"
@@ -13,7 +21,6 @@ import { Transactions } from "@/components/Transactions"
 
 // Types
 import type { Account, Transaction } from "@/generated/prisma"
-import { getAccountsByItemId } from "@/functions/db/accounts"
 
 export default async function Plaid() {
   const session = await auth()
@@ -38,10 +45,8 @@ export default async function Plaid() {
   for (const item of userItems) {
     const accessToken = item.accessToken
     await syncTransactions(accessToken)
-
-    // Get accounts for each item and add them to the accounts array
-    const accountForItemId = await getAccountsByItemId(item.id)
-    accounts.push(...accountForItemId)
+    const itemAccounts = await getAccountsByItemId(item.id)
+    accounts.push(...itemAccounts)
   }
 
   // Aggregate transactions across all of the user's accounts
@@ -53,23 +58,23 @@ export default async function Plaid() {
       transactions.push(...accountTransactions)
     }
   }
-  const clientFriendlyTransactions = transactions.map(convertTransactionForClient)
+  const clientFriendlyTransactions = transactions.map(
+    convertTransactionForClient
+  )
 
   // TODO: After the user connects their accounts, add a new option for "add a new account"
   return (
     <>
       <p>User: {session!.user!.email!}</p>
       <p>Link token: {linkTokenResponse.link_token}</p>
-      {
-        userItems.length === 0
-          ?
-          <PlaidLink
-            linkToken={linkTokenResponse.link_token}
-            userId={user.id}
-          />
-          :
-          <Transactions initialTransactions={clientFriendlyTransactions} accounts={accounts} />
-      }
+      {userItems.length === 0 ? (
+        <PlaidLink linkToken={linkTokenResponse.link_token} userId={user.id} />
+      ) : (
+        <Transactions
+          initialTransactions={clientFriendlyTransactions}
+          accounts={accounts}
+        />
+      )}
       <SignOut />
     </>
   )

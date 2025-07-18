@@ -7,9 +7,5 @@ async function handleLoginWithGoogle() {
 }
 
 export function SignIn() {
-  return (
-    <button onClick={handleLoginWithGoogle}>
-      Login with Google
-    </button>
-  )
+  return <button onClick={handleLoginWithGoogle}>Login with Google</button>
 }
