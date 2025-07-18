@@ -1,4 +1,4 @@
-import { randomBytes, createCipheriv, createDecipheriv } from "crypto";
+import { randomBytes, createCipheriv, createDecipheriv } from "crypto"
 
 export class GCM {
   /**
@@ -11,103 +11,109 @@ export class GCM {
     https://medium.com/@bh03051999/aes-gcm-encryption-and-decryption-for-python-java-and-typescript-562dcaa96c22
    */
 
-  private key: Buffer;
-  private static readonly ALGORITHM = "aes-256-gcm";
-  private static readonly IV_LEN = 12;
-  private static readonly TAG_LEN = 16;
-  private static readonly KEY_LEN = 32;
+  private key: Buffer
+  private static readonly ALGORITHM = "aes-256-gcm"
+  private static readonly IV_LEN = 12
+  private static readonly TAG_LEN = 16
+  private static readonly KEY_LEN = 32
 
   constructor(keyBase64: string) {
     if (!keyBase64 || !GCM.isValidKey(keyBase64)) {
       throw new Error(
-        `Invalid key (or missing): must be base64 and exactly ${GCM.KEY_LEN} bytes after decoding.`,
-      );
+        `Invalid key (or missing): must be base64 and exactly ${GCM.KEY_LEN} bytes after decoding.`
+      )
     }
-    this.key = Buffer.from(keyBase64, "base64");
+    this.key = Buffer.from(keyBase64, "base64")
   }
 
   private static isValidKey(keyBase64: string): boolean {
     try {
-      const key = Buffer.from(keyBase64, "base64");
-      return key.length === GCM.KEY_LEN;
+      const key = Buffer.from(keyBase64, "base64")
+      return key.length === GCM.KEY_LEN
     } catch {
-      return false;
+      return false
     }
   }
 
   public encrypt(plainText: string): string {
     try {
-      const iv = randomBytes(GCM.IV_LEN);
+      const iv = randomBytes(GCM.IV_LEN)
 
-      const cipher = createCipheriv(GCM.ALGORITHM, this.key, iv);
+      const cipher = createCipheriv(GCM.ALGORITHM, this.key, iv)
 
       const encrypted = Buffer.concat([
         cipher.update(String(plainText), "utf-8"),
-        cipher.final(),
-      ]);
+        cipher.final()
+      ])
 
-      const tag = cipher.getAuthTag();
-      return Buffer.concat([iv, encrypted, tag]).toString("base64");
+      const tag = cipher.getAuthTag()
+      return Buffer.concat([iv, encrypted, tag]).toString("base64")
     } catch (err) {
-      throw new Error(`Encryption failed: ${(err as Error).message}`);
+      throw new Error(`Encryption failed: ${(err as Error).message}`)
     }
   }
 
   public decrypt(cipherText: string): string {
     try {
-      const stringValue = Buffer.from(String(cipherText), "base64");
+      const stringValue = Buffer.from(String(cipherText), "base64")
 
-      const iv = stringValue.slice(0, GCM.IV_LEN);
+      const iv = stringValue.slice(0, GCM.IV_LEN)
       const encrypted = stringValue.slice(
         GCM.IV_LEN,
-        stringValue.length - GCM.TAG_LEN,
-      );
-      const tag = stringValue.slice(-GCM.TAG_LEN);
+        stringValue.length - GCM.TAG_LEN
+      )
+      const tag = stringValue.slice(-GCM.TAG_LEN)
 
-      const decipher = createDecipheriv(GCM.ALGORITHM, this.key, iv);
+      const decipher = createDecipheriv(GCM.ALGORITHM, this.key, iv)
 
-      decipher.setAuthTag(tag);
+      decipher.setAuthTag(tag)
       const decrypted = Buffer.concat([
         decipher.update(encrypted),
-        decipher.final(),
-      ]);
-      return decrypted.toString("utf-8");
+        decipher.final()
+      ])
+      return decrypted.toString("utf-8")
     } catch (err) {
-      throw new Error(`Decryption failed: ${(err as Error).message}`);
+      throw new Error(`Decryption failed: ${(err as Error).message}`)
     }
   }
 
   static makeKey(): string {
-    return randomBytes(32).toString("base64");
+    return randomBytes(32).toString("base64")
   }
 }
 
-export function encryptAccessToken(plainText: string, encryptionKey: string, encryptionKeyVersion: string): {
-  cipherText: string;
+export function encryptAccessToken(
+  plainText: string,
+  encryptionKey: string,
+  encryptionKeyVersion: string
+): {
+  cipherText: string
   keyVersion: string
 } {
-
   // GCM class handles missing/invalid keys, but version is also a must
   if (!encryptionKey || !encryptionKeyVersion)
-    throw new Error("Missing encryption key or key version!");
+    throw new Error("Missing encryption key or key version!")
 
   // Encrypt token prior to DB insert
-  const encrypted = new GCM(encryptionKey).encrypt(plainText);
+  const encrypted = new GCM(encryptionKey).encrypt(plainText)
 
-  return { cipherText: encrypted, keyVersion: encryptionKeyVersion };
+  return { cipherText: encrypted, keyVersion: encryptionKeyVersion }
 }
 
-export function decryptAccessToken(cipherText: string, encryptionKey: string, encryptionKeyVersion: string): { 
-  plainText: string; 
-  keyVersion: string 
+export function decryptAccessToken(
+  cipherText: string,
+  encryptionKey: string,
+  encryptionKeyVersion: string
+): {
+  plainText: string
+  keyVersion: string
 } {
-
   // GCM class handles missing/invalid keys, but version is also a must
   if (!encryptionKey || !encryptionKeyVersion)
-    throw new Error("Missing encryption key or key version!");
+    throw new Error("Missing encryption key or key version!")
 
   // Encrypt token prior to DB insert
-  const decrypted = new GCM(encryptionKey).decrypt(cipherText);
+  const decrypted = new GCM(encryptionKey).decrypt(cipherText)
 
-  return { plainText: decrypted, keyVersion: encryptionKeyVersion }; 
+  return { plainText: decrypted, keyVersion: encryptionKeyVersion }
 }
