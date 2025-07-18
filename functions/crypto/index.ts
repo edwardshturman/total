@@ -1,7 +1,6 @@
-import { randomBytes, createCipheriv, createDecipheriv } from 'crypto';
+import { randomBytes, createCipheriv, createDecipheriv } from "crypto"
 
 export class GCM {
-
   /**
     "If the IV is created randomly at each invocation, the birthday paradox kicks in with 96 bit nonces too. 
     You will need to invoke the cipher with the same key no more than 2^32 times in all cases."
@@ -18,14 +17,16 @@ export class GCM {
   private static readonly TAG_LEN = 16
   private static readonly KEY_LEN = 32
 
-  constructor( keyBase64: string ) {
+  constructor(keyBase64: string) {
     if (!keyBase64 || !GCM.isValidKey(keyBase64)) {
-      throw new Error(`Invalid key (or missing): must be base64 and exactly ${GCM.KEY_LEN} bytes after decoding.`)
+      throw new Error(
+        `Invalid key (or missing): must be base64 and exactly ${GCM.KEY_LEN} bytes after decoding.`
+      )
     }
     this.key = Buffer.from(keyBase64, "base64")
   }
 
-  private static isValidKey( keyBase64: string ): boolean {
+  private static isValidKey(keyBase64: string): boolean {
     try {
       const key = Buffer.from(keyBase64, "base64")
       return key.length === GCM.KEY_LEN
@@ -34,7 +35,7 @@ export class GCM {
     }
   }
 
-  public encrypt( plainText: string ): string {
+  public encrypt(plainText: string): string {
     try {
       const iv = randomBytes(GCM.IV_LEN)
 
@@ -47,26 +48,31 @@ export class GCM {
 
       const tag = cipher.getAuthTag()
       return Buffer.concat([iv, encrypted, tag]).toString("base64")
-    } catch ( err ) {
+    } catch (err) {
       throw new Error(`Encryption failed: ${(err as Error).message}`)
     }
   }
 
-  public decrypt( cipherText: string ): string {
+  public decrypt(cipherText: string): string {
     try {
       const stringValue = Buffer.from(String(cipherText), "base64")
 
       const iv = stringValue.slice(0, GCM.IV_LEN)
-      const encrypted = stringValue.slice(GCM.IV_LEN, stringValue.length - GCM.TAG_LEN)
+      const encrypted = stringValue.slice(
+        GCM.IV_LEN,
+        stringValue.length - GCM.TAG_LEN
+      )
       const tag = stringValue.slice(-GCM.TAG_LEN)
 
       const decipher = createDecipheriv(GCM.ALGORITHM, this.key, iv)
 
       decipher.setAuthTag(tag)
-      const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()])
+      const decrypted = Buffer.concat([
+        decipher.update(encrypted),
+        decipher.final()
+      ])
       return decrypted.toString("utf-8")
-    }
-    catch ( err ) {
+    } catch (err) {
       throw new Error(`Decryption failed: ${(err as Error).message}`)
     }
   }
