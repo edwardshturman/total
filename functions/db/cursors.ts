@@ -1,33 +1,28 @@
 import prisma from "@/functions/db"
 
-type CreateCursorInput = {
-  accessToken: string
+type CursorInput = {
+  itemId: string
   string: string
 }
 
-type UpdateCursorInput = {
-  accessToken: string
-  string: string
-}
-
-export async function getCursor(accessToken: string) {
+export async function getCursor(itemId: string) {
   return await prisma.cursor.findUnique({
-    where: { accessToken }
+    where: { itemId }
   })
 }
 
-export async function createCursor(cursorInput: CreateCursorInput) {
+export async function createCursor(cursorInput: CursorInput) {
   return await prisma.cursor.create({
     data: {
-      accessToken: cursorInput.accessToken,
+      itemId: cursorInput.itemId,
       string: cursorInput.string
     }
   })
 }
 
-export async function updateCursor(cursorInput: UpdateCursorInput) {
+export async function updateCursor(cursorInput: CursorInput) {
   return await prisma.cursor.update({
-    where: { accessToken: cursorInput.accessToken },
+    where: { itemId: cursorInput.itemId },
     data: { string: cursorInput.string }
   })
 }

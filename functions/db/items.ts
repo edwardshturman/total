@@ -4,6 +4,7 @@ type CreateItemInput = {
   id: string
   userId: string
   accessToken: string
+  encryptionKeyVersion: string
   institutionName: string
 }
 
@@ -19,6 +20,7 @@ export async function createItem(itemInput: CreateItemInput) {
       id: itemInput.id,
       userId: itemInput.userId,
       accessToken: itemInput.accessToken,
+      encryptionKeyVersion: itemInput.encryptionKeyVersion,
       institutionName: itemInput.institutionName
     }
   })

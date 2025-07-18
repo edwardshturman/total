@@ -3,6 +3,7 @@ import { auth, isAuthorized } from "@/lib/auth"
 import { getItems } from "@/functions/db/items"
 import { redirect, unauthorized } from "next/navigation"
 import { getAccountsByItemId } from "@/functions/db/accounts"
+import { decryptAccessToken } from "@/functions/crypto/utils"
 import { createUser, getUserByEmail } from "@/functions/db/users"
 import {
   createLinkToken,
@@ -39,21 +40,29 @@ export default async function Plaid() {
     })
   }
 
-  // Sync transactions from all of the user's accounts
-  const userItems = await getItems(user.id)
   const accounts: Account[] = []
+  const transactions: Transaction[] = []
+  const userItems = await getItems(user.id)
+  const encryptionKey = process.env.KEY_IN_USE!
+  const keyVersion = process.env.KEY_VERSION!
   for (const item of userItems) {
-    const accessToken = item.accessToken
+    const encryptedAccessToken = item.accessToken
+    const { plainText: accessToken } = decryptAccessToken(
+      encryptedAccessToken,
+      encryptionKey,
+      keyVersion
+    )
+
+    // Sync transactions from Plaid → db, across all accounts for the given Item
     await syncTransactions(accessToken)
+
+    // Add accounts for the given Item to user's available accounts for filtering
     const itemAccounts = await getAccountsByItemId(item.id)
     accounts.push(...itemAccounts)
-  }
 
-  // Aggregate transactions across all of the user's accounts
-  const transactions: Transaction[] = []
-  for (const item of userItems) {
-    const { accounts } = await getAccounts(item.accessToken)
-    for (const account of accounts) {
+    // Aggregate transactions across Item accounts for rendering
+    const { accounts: accountsFromItem } = await getAccounts(accessToken)
+    for (const account of accountsFromItem) {
       const accountTransactions = await getTransactions(account.account_id)
       transactions.push(...accountTransactions)
     }

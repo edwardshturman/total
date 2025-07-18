@@ -2,7 +2,7 @@ import { randomBytes, createCipheriv, createDecipheriv } from "crypto"
 
 export class GCM {
   /**
-    "If the IV is created randomly at each invocation, the birthday paradox kicks in with 96 bit nonces too. 
+    "If the IV is created randomly at each invocation, the birthday paradox kicks in with 96 bit nonces too.
     You will need to invoke the cipher with the same key no more than 2^32 times in all cases."
     https://crypto.stackexchange.com/questions/41601/aes-gcm-recommended-iv-size-why-12-bytes
    */
@@ -80,4 +80,40 @@ export class GCM {
   static makeKey(): string {
     return randomBytes(32).toString("base64")
   }
+}
+
+export function encryptAccessToken(
+  plainText: string,
+  encryptionKey: string,
+  encryptionKeyVersion: string
+): {
+  cipherText: string
+  keyVersion: string
+} {
+  // GCM class handles missing/invalid keys, but version is also a must
+  if (!encryptionKey || !encryptionKeyVersion)
+    throw new Error("Missing encryption key or key version!")
+
+  // Encrypt token prior to DB insert
+  const encrypted = new GCM(encryptionKey).encrypt(plainText)
+
+  return { cipherText: encrypted, keyVersion: encryptionKeyVersion }
+}
+
+export function decryptAccessToken(
+  cipherText: string,
+  encryptionKey: string,
+  encryptionKeyVersion: string
+): {
+  plainText: string
+  keyVersion: string
+} {
+  // GCM class handles missing/invalid keys, but version is also a must
+  if (!encryptionKey || !encryptionKeyVersion)
+    throw new Error("Missing encryption key or key version!")
+
+  // Encrypt token prior to DB insert
+  const decrypted = new GCM(encryptionKey).decrypt(cipherText)
+
+  return { plainText: decrypted, keyVersion: encryptionKeyVersion }
 }
