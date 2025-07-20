@@ -43,16 +43,36 @@ model Account {
 }
 
 model Transaction {
-  id           String   @id
-  accountId    String
-  currencyCode String
-  amount       Decimal
-  date         DateTime @default(now())
-  name         String
-  pending      Boolean
-  account      Account  @relation("AccountTransactions", fields: [accountId], references: [id])
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @default(now())
+  id                            String                       @id
+  accountId                     String
+  primaryTransactionCategoryId  String?
+  detailedTransactionCategoryId String?
+  currencyCode                  String
+  amount                        Decimal
+  date                          DateTime                     @default(now())
+  name                          String
+  pending                       Boolean
+  account                       Account                      @relation("AccountTransactions", fields: [accountId], references: [id])
+  createdAt                     DateTime                     @default(now())
+  updatedAt                     DateTime                     @default(now())
+  primaryTransactionCategory    PrimaryTransactionCategory?  @relation("PrimaryTransactionCategoryTransactions", fields: [primaryTransactionCategoryId], references: [id])
+  detailedTransactionCategory   DetailedTransactionCategory? @relation("DetailedTransactionCategoryTransactions", fields: [detailedTransactionCategoryId], references: [id])
+}
+
+model PrimaryTransactionCategory {
+  id                            String                        @id @default(uuid())
+  name                          String                        @unique
+  detailedTransactionCategories DetailedTransactionCategory[] @relation("PrimaryTransactionCategoryDetailedTransactionCategories")
+  transactions                  Transaction[]                 @relation("PrimaryTransactionCategoryTransactions")
+}
+
+model DetailedTransactionCategory {
+  id                           String                     @id @default(uuid())
+  primaryTransactionCategoryId String
+  name                         String                     @unique
+  description                  String?
+  primaryTransactionCategory   PrimaryTransactionCategory @relation("PrimaryTransactionCategoryDetailedTransactionCategories", fields: [primaryTransactionCategoryId], references: [id])
+  transactions                 Transaction[]              @relation("DetailedTransactionCategoryTransactions")
 }
 
 model Cursor {
