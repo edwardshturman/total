@@ -28,7 +28,14 @@ A minimalist, web-based expense tracker.
   bun migrate
   ```
 
-5. Run the local development server:
+5. Seed the database with category data
+
+  ```zsh
+  export DATABASE_URL=postgresql://postgres:password@localhost:5432/postgres
+  bun seed
+  ```
+
+6. Run the local development server:
 
   ```zsh
   bun run dev
