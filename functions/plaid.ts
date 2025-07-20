@@ -1,11 +1,12 @@
 import {
   Configuration,
   CountryCode,
+  type LinkTokenCreateRequest,
   PlaidApi,
   PlaidEnvironments,
   Products,
-  RemovedTransaction,
-  Transaction as PlaidTransaction
+  type RemovedTransaction,
+  type Transaction as PlaidTransaction
 } from "plaid"
 import {
   createTransaction,
@@ -49,7 +50,7 @@ const configuration = new Configuration({
 const client = new PlaidApi(configuration)
 
 export async function createLinkToken(userId: string) {
-  const linkTokenConfig = {
+  const linkTokenConfig: LinkTokenCreateRequest = {
     user: {
       client_user_id: userId
     },
@@ -109,7 +110,7 @@ function convertPlaidTransactionToDatabaseTransaction(
     : undefined
 
   const newTransaction: Transaction = {
-    name: plaidTransaction.name,
+    name: plaidTransaction.original_description || plaidTransaction.name,
     id: plaidTransaction.transaction_id,
     accountId: plaidTransaction.account_id,
     ...(primaryCategory && {
@@ -154,7 +155,10 @@ export async function syncTransactions(accessToken: string) {
   while (hasMore) {
     const transactions = await client.transactionsSync({
       access_token: accessToken,
-      cursor
+      cursor,
+      options: {
+        include_original_description: true
+      }
       // TODO: add support for filtering by account_id
     })
     const data = transactions.data
